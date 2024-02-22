@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,22 +21,24 @@ import com.mrnaif.javalab.utils.AppConstant;
 import com.mrnaif.javalab.utils.AppUtils;
 
 @Service
-@Transactional // TODO: is it needed?
+@Transactional
 public class QRCodeServiceImpl implements QRCodeService {
 
-	@Autowired
 	QRCodeRepository codeRepository;
 
-	@Autowired
 	StorageService storageService;
 
-	@Autowired
 	ModelMapper modelMapper;
+
+	public QRCodeServiceImpl(QRCodeRepository codeRepository, StorageService storageService, ModelMapper modelMapper) {
+		this.codeRepository = codeRepository;
+		this.storageService = storageService;
+		this.modelMapper = modelMapper;
+	}
 
 	@Override
 	public QRCodeResponse createCode(String text, byte[] data) {
 		QRCode code = new QRCode();
-		System.out.println(code.getId());
 		code.setText(text);
 		codeRepository.save(code);
 		String path = storageService.store(code.getId() + ".png", data);

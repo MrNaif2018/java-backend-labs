@@ -2,7 +2,6 @@ package com.mrnaif.javalab.controller;
 
 import java.io.IOException;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -28,11 +27,14 @@ import com.mrnaif.javalab.utils.AppUtils;
 @RequestMapping("/api/v1/qr")
 public class QRController {
 
-	@Autowired
 	QRCodeService codeService;
 
-	@Autowired
 	StorageService storageService;
+
+	public QRController(QRCodeService codeService, StorageService storageService) {
+		this.codeService = codeService;
+		this.storageService = storageService;
+	}
 
 	@PostMapping
 	public ResponseEntity<QRCodeResponse> createCode(@RequestParam("text") String text) {
@@ -40,7 +42,7 @@ public class QRController {
 		try {
 			array = AppUtils.getQRCodeImage(text, 500, 500);
 		} catch (WriterException | IOException e) {
-			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR); // TODO: return json-type error maybe?
+			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		QRCodeResponse response = codeService.createCode(text, array);
 		return new ResponseEntity<>(response, HttpStatus.CREATED);

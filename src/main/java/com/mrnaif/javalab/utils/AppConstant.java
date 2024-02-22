@@ -2,6 +2,9 @@ package com.mrnaif.javalab.utils;
 
 public class AppConstant {
 
+    private AppConstant() {
+    }
+
     public static final String QRCODE_NOT_FOUND = "QRCode not found with id: ";
 
     public static final String DEFAULT_PAGE_NUMBER = "1";

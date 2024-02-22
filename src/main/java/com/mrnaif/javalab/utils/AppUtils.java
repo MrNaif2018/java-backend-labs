@@ -13,6 +13,9 @@ import com.mrnaif.javalab.exception.InvalidRequestException;
 
 public class AppUtils {
 
+	private AppUtils() {
+	}
+
 	public static final void validatePageAndSize(Integer page, Integer size) {
 
 		if (page < 1) {
@@ -36,7 +39,6 @@ public class AppUtils {
 		MatrixToImageConfig con = new MatrixToImageConfig(0xFF000002, 0xFFFFD966);
 
 		MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream, con);
-		byte[] pngData = pngOutputStream.toByteArray();
-		return pngData;
+		return pngOutputStream.toByteArray();
 	}
 }
