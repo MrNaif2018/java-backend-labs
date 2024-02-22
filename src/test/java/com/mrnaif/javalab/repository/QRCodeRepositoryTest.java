@@ -28,7 +28,6 @@ class QRCodeRepositoryTest {
 	@Autowired
 	ModelMapper modelMapper;
 
-	@SuppressWarnings("unlikely-arg-type")
 	@Test
 	@Order(1)
 	void testCreateCode() {
@@ -42,8 +41,8 @@ class QRCodeRepositoryTest {
 
 		codeRepository.save(code);
 
-		assertThat(code.equals(codeRequest));
-		assertThat(code.getId().equals(1));
+		assertThat(code.getText()).isEqualTo(codeRequest.getText());
+		assertThat(code.getId()).isNotNull();
 	}
 
 }

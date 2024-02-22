@@ -18,7 +18,7 @@ import com.mrnaif.javalab.exception.StorageException;
 import com.mrnaif.javalab.exception.StorageFileNotFoundException;
 import com.mrnaif.javalab.serviceimpl.FileSystemStorageService;
 
-public class FileSystemStorageServiceTests {
+class FileSystemStorageServiceTests {
 
     private StorageProperties properties = new StorageProperties();
     private FileSystemStorageService service;
@@ -31,7 +31,7 @@ public class FileSystemStorageServiceTests {
     }
 
     @Test
-    public void emptyUploadLocation() {
+    void emptyUploadLocation() {
         service = null;
         properties.setLocation("");
         assertThrows(StorageException.class, () -> {
@@ -40,14 +40,14 @@ public class FileSystemStorageServiceTests {
     }
 
     @Test
-    public void loadNonExistent() {
+    void loadNonExistent() {
         assertThrows(StorageFileNotFoundException.class, () -> {
             service.load("foo.txt");
         });
     }
 
     @Test
-    public void saveAndLoad() {
+    void saveAndLoad() {
         service.store("foo.txt", "Hello, World".getBytes());
         assertDoesNotThrow(() -> {
             service.load("foo.txt");
@@ -55,22 +55,24 @@ public class FileSystemStorageServiceTests {
     }
 
     @Test
-    public void saveRelativePathNotPermitted() {
+    void saveRelativePathNotPermitted() {
+        byte[] data = "Hello, World".getBytes();
         assertThrows(StorageException.class, () -> {
-            service.store("../foo.txt", "Hello, World".getBytes());
+            service.store("../foo.txt", data);
         });
     }
 
     @Test
-    public void saveAbsolutePathNotPermitted() {
+    void saveAbsolutePathNotPermitted() {
+        byte[] data = "Hello, World".getBytes();
         assertThrows(StorageException.class, () -> {
-            service.store("/etc/passwd", "Hello, World".getBytes());
+            service.store("/etc/passwd", data);
         });
     }
 
     @Test
     @EnabledOnOs({ OS.LINUX })
-    public void saveAbsolutePathInFilenamePermitted() {
+    void saveAbsolutePathInFilenamePermitted() {
         String fileName = "\\etc\\passwd";
         service.store(fileName, "Hello, World".getBytes());
         assertTrue(Files.exists(
@@ -78,8 +80,10 @@ public class FileSystemStorageServiceTests {
     }
 
     @Test
-    public void savePermitted() {
-        service.store("bar/../foo.txt", "Hello, World".getBytes());
+    void savePermitted() {
+        assertDoesNotThrow(() -> {
+            service.store("bar/../foo.txt", "Hello, World".getBytes());
+        });
     }
 
 }
