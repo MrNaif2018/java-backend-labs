@@ -36,9 +36,9 @@ public class AppUtils {
 		BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height);
 
 		ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-		MatrixToImageConfig con = new MatrixToImageConfig(0xFF000002, 0xFFFFD966);
+		MatrixToImageConfig config = new MatrixToImageConfig(0xFF000002, 0xFFFFD966);
 
-		MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream, con);
+		MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream, config);
 		return pngOutputStream.toByteArray();
 	}
 }

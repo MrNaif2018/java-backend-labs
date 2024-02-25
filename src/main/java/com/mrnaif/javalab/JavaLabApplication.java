@@ -12,7 +12,7 @@ import com.mrnaif.javalab.service.StorageService;
 
 @SpringBootApplication
 @EnableConfigurationProperties(StorageProperties.class)
-@EnableJpaAuditing
+@EnableJpaAuditing // for created field
 public class JavaLabApplication {
 
 	public static void main(String[] args) {
