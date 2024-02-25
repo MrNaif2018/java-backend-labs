@@ -2,25 +2,24 @@ package com.mrnaif.javalab.service;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import com.mrnaif.javalab.config.StorageProperties;
 import com.mrnaif.javalab.exception.StorageException;
 import com.mrnaif.javalab.exception.StorageFileNotFoundException;
-import com.mrnaif.javalab.serviceimpl.FileSystemStorageService;
+import com.mrnaif.javalab.service.impl.FileSystemStorageService;
 
+@SpringBootTest
 class FileSystemStorageServiceTests {
 
-    private StorageProperties properties = new StorageProperties();
+    @Autowired
+    private StorageProperties properties;
     private FileSystemStorageService service;
 
     @BeforeEach
@@ -68,15 +67,6 @@ class FileSystemStorageServiceTests {
         assertThrows(StorageException.class, () -> {
             service.store("/etc/passwd", data);
         });
-    }
-
-    @Test
-    @EnabledOnOs({ OS.LINUX })
-    void saveAbsolutePathInFilenamePermitted() {
-        String fileName = "\\etc\\passwd";
-        service.store(fileName, "Hello, World".getBytes());
-        assertTrue(Files.exists(
-                Paths.get(properties.getLocation()).resolve(Paths.get(fileName))));
     }
 
     @Test

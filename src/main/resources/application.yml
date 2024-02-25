@@ -1,0 +1,23 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: true # for large-scale applications, it is recommended to set this to false
+    show-sql: true
+  datasource:
+    url: jdbc:${SPRING_DB_URL:postgresql://localhost:5432/java}
+    username: ${SPRING_DB_USER:postgres}
+    password: ${SPRING_DB_PASSWORD:123@}
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 128KB
+      max-request-size: 128KB
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /
+
+server:
+  port: 8080

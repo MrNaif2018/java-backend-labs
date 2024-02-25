@@ -1,4 +1,4 @@
-package com.mrnaif.javalab.serviceimpl;
+package com.mrnaif.javalab.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
