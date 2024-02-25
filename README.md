@@ -1,7 +1,7 @@
 # QRCode generator
 
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MrNaif2018_java-backend-labs&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=MrNaif2018_java-backend-labs)
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=MrNaif2018_java-backend-labs&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=MrNaif2018_java-backend-labs)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MrNaif2018_java-backend-labs&metric=alert_status)](https://sonarcloud.io/summary/overall?id=MrNaif2018_java-backend-labs)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=MrNaif2018_java-backend-labs&metric=security_rating)](https://sonarcloud.io/summary/overall?id=MrNaif2018_java-backend-labs)
 
 This API provides endpoints to generate QRCodes locally for arbitrary texts, store them and get a permanent URL for reference
 
