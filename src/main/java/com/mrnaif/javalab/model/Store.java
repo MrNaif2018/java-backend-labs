@@ -14,6 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
@@ -43,10 +44,25 @@ public class Store {
     private User user;
 
     @ManyToMany
+    @JoinTable(name = "stores_products", joinColumns = { @JoinColumn(name = "store_id") }, inverseJoinColumns = {
+            @JoinColumn(name = "product_id") })
     private Set<Product> products = new HashSet<>();
 
     @CreatedDate
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
+
+    public void addProduct(Product product) {
+        products.add(product);
+        product.getStores().add(this);
+    }
+
+    public void removeProduct(Long productId) {
+        Product product = this.products.stream().filter(t -> t.getId() == productId).findFirst().orElse(null);
+        if (product != null) {
+            this.products.remove(product);
+            product.getStores().remove(this);
+        }
+    }
 
 }

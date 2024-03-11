@@ -1,16 +1,16 @@
 package com.mrnaif.javalab.service;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.mrnaif.javalab.model.User;
+import com.mrnaif.javalab.payload.PageResponse;
 
 public interface UserService {
 
     public User createUser(User user);
 
-    public List<User> getAllUsers();
+    public PageResponse<User> getAllUsers(Integer page, Integer size);
 
     public Optional<User> getUserById(Long id);
 

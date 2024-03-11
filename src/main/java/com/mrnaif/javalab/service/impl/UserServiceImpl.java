@@ -7,12 +7,18 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.model.User;
+import com.mrnaif.javalab.payload.PageResponse;
 import com.mrnaif.javalab.repository.UserRepository;
 import com.mrnaif.javalab.service.UserService;
+import com.mrnaif.javalab.utils.AppUtils;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -34,11 +40,28 @@ public class UserServiceImpl implements UserService {
 
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        try {
+            return userRepository.save(user);
+        } catch (Exception e) {
+            throw new InvalidRequestException(e.getMessage());
+        }
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public PageResponse<User> getAllUsers(Integer page, Integer size) {
+        AppUtils.validatePageAndSize(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<User> objects = userRepository.findAll(pageable);
+        List<User> responses = objects.getContent();
+
+        PageResponse<User> pageResponse = new PageResponse<>();
+        pageResponse.setContent(responses);
+        pageResponse.setSize(size);
+        pageResponse.setPage(page);
+        pageResponse.setTotalElements(objects.getNumberOfElements());
+        pageResponse.setTotalPages(objects.getTotalPages());
+        pageResponse.setLast(objects.isLast());
+
+        return pageResponse;
     }
 
     public Optional<User> getUserById(Long id) {

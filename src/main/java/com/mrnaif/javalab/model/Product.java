@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "stores")
+@Table(name = "products")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -54,5 +54,15 @@ public class Product {
     @CreatedDate
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
+
+    public void addStore(Store store) {
+        stores.add(store);
+        store.getProducts().add(this);
+    }
+
+    public void removeStore(Store store) {
+        stores.remove(store);
+        store.getProducts().remove(this);
+    }
 
 }
