@@ -8,10 +8,10 @@ import com.mrnaif.javalab.utils.cache.GenericCache;
 import com.mrnaif.javalab.utils.cache.SimpleCache;
 
 @Configuration
-public class CacheConfig {
+public class CacheConfig<K, V> {
     @Bean
     @Scope("prototype")
-    public GenericCache cache() {
+    public GenericCache<K, V> cache() {
         return new SimpleCache<>();
     }
 }
