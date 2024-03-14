@@ -121,8 +121,7 @@ public class StoreServiceImpl implements StoreService {
                         + productId));
         store.addProduct(product);
         Store savedStore = storeRepository.save(store);
-        DisplayStore mapped = modelMapper.map(savedStore, DisplayStore.class);
-        return mapped;
+        return modelMapper.map(savedStore, DisplayStore.class);
     }
 
     public DisplayStore removeProductFromStore(Long storeId, Long productId) {
