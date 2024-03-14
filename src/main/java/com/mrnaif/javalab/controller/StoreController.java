@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.product.DisplayProduct;
 import com.mrnaif.javalab.payload.store.CreateStore;
 import com.mrnaif.javalab.payload.store.DisplayStore;
 import com.mrnaif.javalab.payload.store.EditProductsRequest;
@@ -77,6 +78,16 @@ public class StoreController {
             @RequestBody EditProductsRequest request) {
         storeService.removeProductFromStore(id, request.getProductId());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/products")
+    public PageResponse<DisplayProduct> getProductsByStoreIdAndPrice(
+            @PathVariable Long id,
+            @RequestParam("minPrice") Double minPrice,
+            @RequestParam("maxPrice") Double maxPrice,
+            @RequestParam(value = "page", required = false, defaultValue = AppConstant.DEFAULT_PAGE_NUMBER) Integer page,
+            @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE) Integer size) {
+        return storeService.getProductsRange(id, minPrice, maxPrice, page, size);
     }
 
 }

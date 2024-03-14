@@ -19,12 +19,14 @@ import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
 import com.mrnaif.javalab.model.Store;
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.product.DisplayProduct;
 import com.mrnaif.javalab.payload.store.CreateStore;
 import com.mrnaif.javalab.payload.store.DisplayStore;
 import com.mrnaif.javalab.repository.ProductRepository;
 import com.mrnaif.javalab.repository.StoreRepository;
 import com.mrnaif.javalab.service.StoreService;
 import com.mrnaif.javalab.utils.AppUtils;
+import com.mrnaif.javalab.utils.cache.GenericCache;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -41,11 +43,14 @@ public class StoreServiceImpl implements StoreService {
 
     ModelMapper modelMapper;
 
+    GenericCache<Long, Store> cache;
+
     public StoreServiceImpl(StoreRepository storeRepository, ProductRepository productRepository,
-            ModelMapper modelMapper) {
+            ModelMapper modelMapper, GenericCache<Long, Store> cache) {
         this.storeRepository = storeRepository;
         this.productRepository = productRepository;
         this.modelMapper = modelMapper;
+        this.cache = cache;
     }
 
     public DisplayStore createStore(CreateStore store) {
@@ -75,17 +80,19 @@ public class StoreServiceImpl implements StoreService {
     }
 
     public Optional<DisplayStore> getStoreById(Long id) {
-        Optional<Store> store = storeRepository.findById(id);
-        if (!store.isPresent()) {
+        Store store = cache.get(id).orElseGet(() -> storeRepository.findById(id).orElse(null));
+        if (store == null) {
             return Optional.empty();
         }
-        return Optional.of(modelMapper.map(store.get(), DisplayStore.class));
+        cache.put(id, store);
+        return Optional.of(modelMapper.map(store, DisplayStore.class));
     }
 
     public DisplayStore updateStore(Long id, CreateStore createStore) {
         Store store = modelMapper.map(createStore, Store.class);
         store.setId(id); // to allow hibernate to find existing instance
         storeRepository.saveAndFlush(store);
+        cache.invalidate(id);
         // required to return proper fields like created unfortunately
         Store managedStore = entityManager.find(Store.class, store.getId());
         entityManager.refresh(managedStore);
@@ -104,12 +111,14 @@ public class StoreServiceImpl implements StoreService {
         BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(store);
         beanWrapper.setPropertyValues(updates);
         storeRepository.saveAndFlush(store);
+        cache.invalidate(id);
         entityManager.refresh(store);
         return modelMapper.map(store, DisplayStore.class);
     }
 
     public void deleteStore(Long id) {
         storeRepository.deleteById(id);
+        cache.invalidate(id);
     }
 
     public DisplayStore addProductToStore(Long storeId, Long productId) {
@@ -121,6 +130,7 @@ public class StoreServiceImpl implements StoreService {
                         + productId));
         store.addProduct(product);
         Store savedStore = storeRepository.save(store);
+        cache.invalidate(storeId);
         return modelMapper.map(savedStore, DisplayStore.class);
     }
 
@@ -129,7 +139,26 @@ public class StoreServiceImpl implements StoreService {
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with id = "
                         + storeId));
         store.removeProduct(productId);
+        cache.invalidate(storeId);
         return modelMapper.map(storeRepository.save(store), DisplayStore.class);
+    }
+
+    public PageResponse<DisplayProduct> getProductsRange(Long storeId, Double minPrice, Double maxPrice, Integer page,
+            Integer size) {
+        AppUtils.validatePageAndSize(page, size);
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Product> objects = productRepository.findProductsByStoresIdAndPrice(storeId, minPrice, maxPrice, pageable);
+        List<DisplayProduct> responses = Arrays.asList(modelMapper.map(objects.getContent(), DisplayProduct[].class));
+
+        PageResponse<DisplayProduct> pageResponse = new PageResponse<>();
+        pageResponse.setContent(responses);
+        pageResponse.setSize(size);
+        pageResponse.setPage(page);
+        pageResponse.setTotalElements(objects.getNumberOfElements());
+        pageResponse.setTotalPages(objects.getTotalPages());
+        pageResponse.setLast(objects.isLast());
+
+        return pageResponse;
     }
 
 }

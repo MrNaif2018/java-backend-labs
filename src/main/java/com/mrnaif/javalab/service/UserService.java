@@ -9,16 +9,16 @@ import com.mrnaif.javalab.payload.user.DisplayUser;
 
 public interface UserService {
 
-    public DisplayUser createUser(CreateUser user);
+    DisplayUser createUser(CreateUser user);
 
-    public PageResponse<DisplayUser> getAllUsers(Integer page, Integer size);
+    PageResponse<DisplayUser> getAllUsers(Integer page, Integer size);
 
-    public Optional<DisplayUser> getUserById(Long id);
+    Optional<DisplayUser> getUserById(Long id);
 
-    public DisplayUser updateUser(Long id, CreateUser user);
+    DisplayUser updateUser(Long id, CreateUser user);
 
-    public DisplayUser partialUpdateUser(Long id, Map<String, Object> updates);
+    DisplayUser partialUpdateUser(Long id, Map<String, Object> updates);
 
-    public void deleteUser(Long id);
+    void deleteUser(Long id);
 
 }

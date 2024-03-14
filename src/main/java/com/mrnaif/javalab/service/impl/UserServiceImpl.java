@@ -23,6 +23,7 @@ import com.mrnaif.javalab.payload.user.DisplayUser;
 import com.mrnaif.javalab.repository.UserRepository;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppUtils;
+import com.mrnaif.javalab.utils.cache.GenericCache;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -39,10 +40,14 @@ public class UserServiceImpl implements UserService {
 
     ModelMapper modelMapper;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
+    GenericCache<Long, User> cache;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper,
+            GenericCache<Long, User> cache) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
+        this.cache = cache;
     }
 
     public DisplayUser createUser(CreateUser user) {
@@ -72,17 +77,19 @@ public class UserServiceImpl implements UserService {
     }
 
     public Optional<DisplayUser> getUserById(Long id) {
-        Optional<User> user = userRepository.findById(id);
-        if (!user.isPresent()) {
+        User user = cache.get(id).orElseGet(() -> userRepository.findById(id).orElse(null));
+        if (user == null) {
             return Optional.empty();
         }
-        return Optional.of(modelMapper.map(user.get(), DisplayUser.class));
+        cache.put(id, user);
+        return Optional.of(modelMapper.map(user, DisplayUser.class));
     }
 
     public DisplayUser updateUser(Long id, CreateUser createUser) {
         User user = modelMapper.map(createUser, User.class);
         user.setId(id); // to allow hibernate to find existing instance
         userRepository.saveAndFlush(user);
+        cache.invalidate(id);
         // required to return proper fields like created unfortunately
         User managedUser = entityManager.find(User.class, user.getId());
         entityManager.refresh(managedUser);
@@ -104,12 +111,14 @@ public class UserServiceImpl implements UserService {
         BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(user);
         beanWrapper.setPropertyValues(updates);
         userRepository.saveAndFlush(user);
+        cache.invalidate(id);
         entityManager.refresh(user);
         return modelMapper.map(user, DisplayUser.class);
     }
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
+        cache.invalidate(id);
     }
 
 }

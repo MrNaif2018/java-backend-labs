@@ -22,6 +22,7 @@ import com.mrnaif.javalab.payload.product.DisplayProduct;
 import com.mrnaif.javalab.repository.ProductRepository;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppUtils;
+import com.mrnaif.javalab.utils.cache.GenericCache;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -37,9 +38,13 @@ public class ProductServiceImpl implements ProductService {
 
     ModelMapper modelMapper;
 
-    public ProductServiceImpl(ProductRepository productRepository, ModelMapper modelMapper) {
+    GenericCache<Long, Product> cache;
+
+    public ProductServiceImpl(ProductRepository productRepository, ModelMapper modelMapper,
+            GenericCache<Long, Product> cache) {
         this.productRepository = productRepository;
         this.modelMapper = modelMapper;
+        this.cache = cache;
     }
 
     public DisplayProduct createProduct(CreateProduct product) {
@@ -71,17 +76,19 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public Optional<DisplayProduct> getProductById(Long id) {
-        Optional<Product> product = productRepository.findById(id);
-        if (!product.isPresent()) {
+        Product product = cache.get(id).orElseGet(() -> productRepository.findById(id).orElse(null));
+        if (product == null) {
             return Optional.empty();
         }
-        return Optional.of(modelMapper.map(product.get(), DisplayProduct.class));
+        cache.put(id, product);
+        return Optional.of(modelMapper.map(product, DisplayProduct.class));
     }
 
     public DisplayProduct updateProduct(Long id, CreateProduct createProduct) {
         Product product = modelMapper.map(createProduct, Product.class);
         product.setId(id); // to allow hibernate to find existing instance
         productRepository.saveAndFlush(product);
+        cache.invalidate(id);
         // required to return proper fields like created unfortunately
         Product managedProduct = entityManager.find(Product.class, product.getId());
         entityManager.refresh(managedProduct);
@@ -100,11 +107,13 @@ public class ProductServiceImpl implements ProductService {
         BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(product);
         beanWrapper.setPropertyValues(updates);
         productRepository.saveAndFlush(product);
+        cache.invalidate(id);
         entityManager.refresh(product);
         return modelMapper.map(product, DisplayProduct.class);
     }
 
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
+        cache.invalidate(id);
     }
 }

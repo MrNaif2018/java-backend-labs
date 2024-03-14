@@ -9,16 +9,16 @@ import com.mrnaif.javalab.payload.product.DisplayProduct;
 
 public interface ProductService {
 
-    public DisplayProduct createProduct(CreateProduct product);
+    DisplayProduct createProduct(CreateProduct product);
 
-    public PageResponse<DisplayProduct> getAllProducts(Integer page, Integer size);
+    PageResponse<DisplayProduct> getAllProducts(Integer page, Integer size);
 
-    public Optional<DisplayProduct> getProductById(Long id);
+    Optional<DisplayProduct> getProductById(Long id);
 
-    public DisplayProduct updateProduct(Long id, CreateProduct product);
+    DisplayProduct updateProduct(Long id, CreateProduct product);
 
-    public DisplayProduct partialUpdateProduct(Long id, Map<String, Object> updates);
+    DisplayProduct partialUpdateProduct(Long id, Map<String, Object> updates);
 
-    public void deleteProduct(Long id);
+    void deleteProduct(Long id);
 
 }
