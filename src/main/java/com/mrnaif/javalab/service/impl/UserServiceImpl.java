@@ -1,10 +1,12 @@
 package com.mrnaif.javalab.service.impl;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.user.CreateUser;
+import com.mrnaif.javalab.payload.user.DisplayUser;
 import com.mrnaif.javalab.repository.UserRepository;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppUtils;
@@ -33,27 +37,30 @@ public class UserServiceImpl implements UserService {
     @PersistenceContext
     private EntityManager entityManager;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    ModelMapper modelMapper;
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
     }
 
-    public User createUser(User user) {
+    public DisplayUser createUser(CreateUser user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         try {
-            return userRepository.save(user);
+            return modelMapper.map(userRepository.save(modelMapper.map(user, User.class)), DisplayUser.class);
         } catch (Exception e) {
             throw new InvalidRequestException(e.getMessage());
         }
     }
 
-    public PageResponse<User> getAllUsers(Integer page, Integer size) {
+    public PageResponse<DisplayUser> getAllUsers(Integer page, Integer size) {
         AppUtils.validatePageAndSize(page, size);
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<User> objects = userRepository.findAll(pageable);
-        List<User> responses = objects.getContent();
+        List<DisplayUser> responses = Arrays.asList(modelMapper.map(objects.getContent(), DisplayUser[].class));
 
-        PageResponse<User> pageResponse = new PageResponse<>();
+        PageResponse<DisplayUser> pageResponse = new PageResponse<>();
         pageResponse.setContent(responses);
         pageResponse.setSize(size);
         pageResponse.setPage(page);
@@ -64,20 +71,25 @@ public class UserServiceImpl implements UserService {
         return pageResponse;
     }
 
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<DisplayUser> getUserById(Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (!user.isPresent()) {
+            return Optional.empty();
+        }
+        return Optional.of(modelMapper.map(user.get(), DisplayUser.class));
     }
 
-    public User updateUser(Long id, User user) {
+    public DisplayUser updateUser(Long id, CreateUser createUser) {
+        User user = modelMapper.map(createUser, User.class);
         user.setId(id); // to allow hibernate to find existing instance
         userRepository.saveAndFlush(user);
         // required to return proper fields like created unfortunately
         User managedUser = entityManager.find(User.class, user.getId());
         entityManager.refresh(managedUser);
-        return managedUser;
+        return modelMapper.map(managedUser, DisplayUser.class);
     }
 
-    public User partialUpdateUser(Long id, Map<String, Object> updates) {
+    public DisplayUser partialUpdateUser(Long id, Map<String, Object> updates) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (!optionalUser.isPresent()) {
             return null;
@@ -93,7 +105,7 @@ public class UserServiceImpl implements UserService {
         beanWrapper.setPropertyValues(updates);
         userRepository.saveAndFlush(user);
         entityManager.refresh(user);
-        return user;
+        return modelMapper.map(user, DisplayUser.class);
     }
 
     public void deleteUser(Long id) {

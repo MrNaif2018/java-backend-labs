@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.user.CreateUser;
+import com.mrnaif.javalab.payload.user.DisplayUser;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppConstant;
 
@@ -30,30 +31,31 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
+    public ResponseEntity<DisplayUser> createUser(@RequestBody CreateUser user) {
         return ResponseEntity.ok(userService.createUser(user));
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<User>> getAllUsers(
+    public ResponseEntity<PageResponse<DisplayUser>> getAllUsers(
             @RequestParam(value = "page", required = false, defaultValue = AppConstant.DEFAULT_PAGE_NUMBER) Integer page,
             @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE) Integer size) {
         return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<DisplayUser> getUserById(@PathVariable Long id) {
         // of allows to return 404 if optional is not present()
         return ResponseEntity.of(userService.getUserById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
+    public ResponseEntity<DisplayUser> updateUser(@PathVariable Long id, @RequestBody CreateUser user) {
         return ResponseEntity.ok(userService.updateUser(id, user));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<User> partialUpdateUser(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<DisplayUser> partialUpdateUser(@PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
         return ResponseEntity.ok(userService.partialUpdateUser(id, updates));
     }
 

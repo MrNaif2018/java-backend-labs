@@ -14,8 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mrnaif.javalab.model.Product;
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.product.CreateProduct;
+import com.mrnaif.javalab.payload.product.DisplayProduct;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppConstant;
 
@@ -30,30 +31,30 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> createProduct(@RequestBody Product product) {
+    public ResponseEntity<DisplayProduct> createProduct(@RequestBody CreateProduct product) {
         return ResponseEntity.ok(productService.createProduct(product));
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<Product>> getAllProducts(
+    public ResponseEntity<PageResponse<DisplayProduct>> getAllProducts(
             @RequestParam(value = "page", required = false, defaultValue = AppConstant.DEFAULT_PAGE_NUMBER) Integer page,
             @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE) Integer size) {
         return ResponseEntity.ok(productService.getAllProducts(page, size));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable Long id) {
+    public ResponseEntity<DisplayProduct> getProductById(@PathVariable Long id) {
         // of allows to return 404 if optional is not present()
         return ResponseEntity.of(productService.getProductById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> updateProduct(@PathVariable Long id, @RequestBody Product product) {
+    public ResponseEntity<DisplayProduct> updateProduct(@PathVariable Long id, @RequestBody CreateProduct product) {
         return ResponseEntity.ok(productService.updateProduct(id, product));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Product> partialUpdateProduct(@PathVariable Long id,
+    public ResponseEntity<DisplayProduct> partialUpdateProduct(@PathVariable Long id,
             @RequestBody Map<String, Object> updates) {
         return ResponseEntity.ok(productService.partialUpdateProduct(id, updates));
     }

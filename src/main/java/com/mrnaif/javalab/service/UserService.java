@@ -3,20 +3,21 @@ package com.mrnaif.javalab.service;
 import java.util.Map;
 import java.util.Optional;
 
-import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.user.CreateUser;
+import com.mrnaif.javalab.payload.user.DisplayUser;
 
 public interface UserService {
 
-    public User createUser(User user);
+    public DisplayUser createUser(CreateUser user);
 
-    public PageResponse<User> getAllUsers(Integer page, Integer size);
+    public PageResponse<DisplayUser> getAllUsers(Integer page, Integer size);
 
-    public Optional<User> getUserById(Long id);
+    public Optional<DisplayUser> getUserById(Long id);
 
-    public User updateUser(Long id, User user);
+    public DisplayUser updateUser(Long id, CreateUser user);
 
-    public User partialUpdateUser(Long id, Map<String, Object> updates);
+    public DisplayUser partialUpdateUser(Long id, Map<String, Object> updates);
 
     public void deleteUser(Long id);
 

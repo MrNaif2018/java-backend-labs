@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mrnaif.javalab.model.Product;
-import com.mrnaif.javalab.model.Store;
 import com.mrnaif.javalab.payload.PageResponse;
+import com.mrnaif.javalab.payload.store.CreateStore;
+import com.mrnaif.javalab.payload.store.DisplayStore;
+import com.mrnaif.javalab.payload.store.EditProductsRequest;
 import com.mrnaif.javalab.service.StoreService;
 import com.mrnaif.javalab.utils.AppConstant;
 
@@ -31,30 +32,31 @@ public class StoreController {
     }
 
     @PostMapping
-    public ResponseEntity<Store> createStore(@RequestBody Store store) {
+    public ResponseEntity<DisplayStore> createStore(@RequestBody CreateStore store) {
         return ResponseEntity.ok(storeService.createStore(store));
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<Store>> getAllStores(
+    public ResponseEntity<PageResponse<DisplayStore>> getAllStores(
             @RequestParam(value = "page", required = false, defaultValue = AppConstant.DEFAULT_PAGE_NUMBER) Integer page,
             @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE) Integer size) {
         return ResponseEntity.ok(storeService.getAllStores(page, size));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Store> getStoreById(@PathVariable Long id) {
+    public ResponseEntity<DisplayStore> getStoreById(@PathVariable Long id) {
         // of allows to return 404 if optional is not present()
         return ResponseEntity.of(storeService.getStoreById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Store> updateStore(@PathVariable Long id, @RequestBody Store store) {
+    public ResponseEntity<DisplayStore> updateStore(@PathVariable Long id, @RequestBody CreateStore store) {
         return ResponseEntity.ok(storeService.updateStore(id, store));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Store> partialUpdateStore(@PathVariable Long id, @RequestBody Map<String, Object> updates) {
+    public ResponseEntity<DisplayStore> partialUpdateStore(@PathVariable Long id,
+            @RequestBody Map<String, Object> updates) {
         return ResponseEntity.ok(storeService.partialUpdateStore(id, updates));
     }
 
@@ -65,20 +67,15 @@ public class StoreController {
     }
 
     @PostMapping("/{id}/products")
-    public ResponseEntity<Store> addProductToStore(@PathVariable Long id, @RequestBody Product product) {
-        return ResponseEntity.ok(storeService.addProductToStore(id, product));
+    public ResponseEntity<DisplayStore> addProductToStore(@PathVariable Long id,
+            @RequestBody EditProductsRequest request) {
+        return ResponseEntity.ok(storeService.addProductToStore(id, request.getProductId()));
     }
 
-    @GetMapping("/{id}/products")
-    public ResponseEntity<PageResponse<Product>> getProductsInStore(@PathVariable Long id,
-            @RequestParam(value = "page", required = false, defaultValue = AppConstant.DEFAULT_PAGE_NUMBER) Integer page,
-            @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE) Integer size) {
-        return ResponseEntity.ok(storeService.getProductsInStore(id, page, size));
-    }
-
-    @DeleteMapping("/{id}/products/{productId}")
-    public ResponseEntity<Void> removeProductFromStore(@PathVariable Long id, @PathVariable Long productId) {
-        storeService.removeProductFromStore(id, productId);
+    @DeleteMapping("/{id}/products")
+    public ResponseEntity<Void> removeProductFromStore(@PathVariable Long id,
+            @RequestBody EditProductsRequest request) {
+        storeService.removeProductFromStore(id, request.getProductId());
         return ResponseEntity.ok().build();
     }
 

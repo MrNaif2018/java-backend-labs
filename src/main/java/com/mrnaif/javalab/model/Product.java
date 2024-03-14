@@ -19,6 +19,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -49,6 +50,7 @@ public class Product {
     private User user;
 
     @ManyToMany(mappedBy = "products")
+    @EqualsAndHashCode.Exclude
     private Set<Store> stores = new HashSet<>();
 
     @CreatedDate
