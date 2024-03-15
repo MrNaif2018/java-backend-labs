@@ -1,8 +1,5 @@
 package com.mrnaif.javalab.payload.product;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,7 +8,5 @@ import lombok.EqualsAndHashCode;
 public class CreateProduct extends BaseProduct {
 
     private Long userId;
-
-    private Set<Long> stores = new HashSet<>();
 
 }

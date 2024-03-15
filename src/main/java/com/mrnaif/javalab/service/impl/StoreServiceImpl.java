@@ -117,6 +117,10 @@ public class StoreServiceImpl implements StoreService {
     }
 
     public void deleteStore(Long id) {
+        Store store = storeRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id = "
+                        + id));
+        store.getProducts().forEach((product) -> product.removeStore(id));
         storeRepository.deleteById(id);
         cache.invalidate(id);
     }

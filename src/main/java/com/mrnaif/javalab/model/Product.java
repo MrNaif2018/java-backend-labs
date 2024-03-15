@@ -62,9 +62,12 @@ public class Product {
         store.getProducts().add(this);
     }
 
-    public void removeStore(Store store) {
-        stores.remove(store);
-        store.getProducts().remove(this);
+    public void removeStore(Long storeId) {
+        Store store = this.stores.stream().filter(t -> t.getId().equals(storeId)).findFirst().orElse(null);
+        if (store != null) {
+            this.stores.remove(store);
+            store.getProducts().remove(this);
+        }
     }
 
 }

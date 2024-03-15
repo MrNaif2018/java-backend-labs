@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.mrnaif.javalab.exception.InvalidRequestException;
+import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
 import com.mrnaif.javalab.payload.PageResponse;
 import com.mrnaif.javalab.payload.product.CreateProduct;
@@ -113,6 +114,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     public void deleteProduct(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id = "
+                        + id));
+        product.getStores().forEach((store) -> store.removeProduct(id));
         productRepository.deleteById(id);
         cache.invalidate(id);
     }

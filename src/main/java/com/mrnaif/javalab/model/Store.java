@@ -61,7 +61,7 @@ public class Store {
     }
 
     public void removeProduct(Long productId) {
-        Product product = this.products.stream().filter(t -> t.getId() == productId).findFirst().orElse(null);
+        Product product = this.products.stream().filter(t -> t.getId().equals(productId)).findFirst().orElse(null);
         if (product != null) {
             this.products.remove(product);
             product.getStores().remove(this);
