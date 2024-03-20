@@ -43,7 +43,7 @@ public class Store {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User user = new User();
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(name = "stores_products", joinColumns = { @JoinColumn(name = "store_id") }, inverseJoinColumns = {
@@ -54,6 +54,10 @@ public class Store {
     @CreatedDate
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
+
+    public void setUserId(Long userId) {
+        this.user.setId(userId);
+    }
 
     public void addProduct(Product product) {
         products.add(product);

@@ -50,8 +50,6 @@ public class ProductServiceImpl implements ProductService {
 
     public DisplayProduct createProduct(CreateProduct product) {
         try {
-            // required because of id fields
-            modelMapper.typeMap(CreateProduct.class, Product.class).addMappings(mapper -> mapper.skip(Product::setId));
             return modelMapper.map(productRepository.save(modelMapper.map(product, Product.class)),
                     DisplayProduct.class);
         } catch (Exception e) {

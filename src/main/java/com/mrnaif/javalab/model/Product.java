@@ -47,7 +47,7 @@ public class Product {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User user = new User();
 
     @ManyToMany(mappedBy = "products")
     @EqualsAndHashCode.Exclude
@@ -56,6 +56,10 @@ public class Product {
     @CreatedDate
     @Column(name = "created", nullable = false, updatable = false)
     private Instant created;
+
+    public void setUserId(Long userId) {
+        this.user.setId(userId);
+    }
 
     public void addStore(Store store) {
         stores.add(store);

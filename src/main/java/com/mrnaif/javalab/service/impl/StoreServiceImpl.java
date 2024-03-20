@@ -55,7 +55,6 @@ public class StoreServiceImpl implements StoreService {
 
     public DisplayStore createStore(CreateStore store) {
         try {
-            modelMapper.typeMap(CreateStore.class, Store.class).addMappings(mapper -> mapper.skip(Store::setId));
             return modelMapper.map(storeRepository.save(modelMapper.map(store, Store.class)), DisplayStore.class);
         } catch (Exception e) {
             throw new InvalidRequestException(e.getMessage());
