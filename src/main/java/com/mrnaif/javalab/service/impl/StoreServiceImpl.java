@@ -25,6 +25,7 @@ import com.mrnaif.javalab.payload.store.DisplayStore;
 import com.mrnaif.javalab.repository.ProductRepository;
 import com.mrnaif.javalab.repository.StoreRepository;
 import com.mrnaif.javalab.service.StoreService;
+import com.mrnaif.javalab.utils.AppConstant;
 import com.mrnaif.javalab.utils.AppUtils;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 
@@ -117,7 +118,7 @@ public class StoreServiceImpl implements StoreService {
 
     public void deleteStore(Long id) {
         Store store = storeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id = "
+                .orElseThrow(() -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND
                         + id));
         store.getProducts().forEach((product) -> product.removeStore(id));
         storeRepository.deleteById(id);
@@ -126,7 +127,7 @@ public class StoreServiceImpl implements StoreService {
 
     public DisplayStore addProductToStore(Long storeId, Long productId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id = "
+                .orElseThrow(() -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND
                         + storeId));
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found with id = "
@@ -139,7 +140,7 @@ public class StoreServiceImpl implements StoreService {
 
     public DisplayStore removeProductFromStore(Long storeId, Long productId) {
         Store store = storeRepository.findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id = "
+                .orElseThrow(() -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND
                         + storeId));
         store.removeProduct(productId);
         cache.invalidate(storeId);
