@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.product.CreateProduct;
-import com.mrnaif.javalab.payload.product.DisplayProduct;
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.product.CreateProduct;
+import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppConstant;
 

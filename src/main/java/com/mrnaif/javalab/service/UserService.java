@@ -3,9 +3,9 @@ package com.mrnaif.javalab.service;
 import java.util.Map;
 import java.util.Optional;
 
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.user.CreateUser;
-import com.mrnaif.javalab.payload.user.DisplayUser;
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.user.CreateUser;
+import com.mrnaif.javalab.dto.user.DisplayUser;
 
 public interface UserService {
 

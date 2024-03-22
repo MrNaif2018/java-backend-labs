@@ -14,12 +14,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.product.CreateProduct;
+import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.product.CreateProduct;
-import com.mrnaif.javalab.payload.product.DisplayProduct;
 import com.mrnaif.javalab.repository.ProductRepository;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppUtils;

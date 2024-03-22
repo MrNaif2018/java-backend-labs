@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.user.CreateUser;
-import com.mrnaif.javalab.payload.user.DisplayUser;
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.user.CreateUser;
+import com.mrnaif.javalab.dto.user.DisplayUser;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppConstant;
 

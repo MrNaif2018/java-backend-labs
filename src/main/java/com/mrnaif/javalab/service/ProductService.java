@@ -3,9 +3,9 @@ package com.mrnaif.javalab.service;
 import java.util.Map;
 import java.util.Optional;
 
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.product.CreateProduct;
-import com.mrnaif.javalab.payload.product.DisplayProduct;
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.product.CreateProduct;
+import com.mrnaif.javalab.dto.product.DisplayProduct;
 
 public interface ProductService {
 

@@ -15,11 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.user.CreateUser;
+import com.mrnaif.javalab.dto.user.DisplayUser;
 import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.model.User;
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.user.CreateUser;
-import com.mrnaif.javalab.payload.user.DisplayUser;
 import com.mrnaif.javalab.repository.UserRepository;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppUtils;

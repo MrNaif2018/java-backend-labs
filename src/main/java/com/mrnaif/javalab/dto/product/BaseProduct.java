@@ -1,4 +1,4 @@
-package com.mrnaif.javalab.payload.product;
+package com.mrnaif.javalab.dto.product;
 
 import lombok.Data;
 

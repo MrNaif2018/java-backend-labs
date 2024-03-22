@@ -1,4 +1,4 @@
-package com.mrnaif.javalab.payload;
+package com.mrnaif.javalab.dto;
 
 import java.util.ArrayList;
 import java.util.List;

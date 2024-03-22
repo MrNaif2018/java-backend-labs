@@ -3,10 +3,10 @@ package com.mrnaif.javalab.service;
 import java.util.Map;
 import java.util.Optional;
 
-import com.mrnaif.javalab.payload.PageResponse;
-import com.mrnaif.javalab.payload.product.DisplayProduct;
-import com.mrnaif.javalab.payload.store.CreateStore;
-import com.mrnaif.javalab.payload.store.DisplayStore;
+import com.mrnaif.javalab.dto.PageResponse;
+import com.mrnaif.javalab.dto.product.DisplayProduct;
+import com.mrnaif.javalab.dto.store.CreateStore;
+import com.mrnaif.javalab.dto.store.DisplayStore;
 
 public interface StoreService {
 

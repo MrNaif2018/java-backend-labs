@@ -1,18 +1,14 @@
-package com.mrnaif.javalab.payload.store;
+package com.mrnaif.javalab.dto.user;
 
 import java.time.Instant;
-import java.util.List;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DisplayStore extends BaseStore {
+public class DisplayUser extends BaseUser {
     private Long id;
 
-    private List<StoreProductInfo> products;
-
     private Instant created;
-
 }

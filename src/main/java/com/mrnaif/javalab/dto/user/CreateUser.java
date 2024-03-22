@@ -1,4 +1,4 @@
-package com.mrnaif.javalab.payload.user;
+package com.mrnaif.javalab.dto.user;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
