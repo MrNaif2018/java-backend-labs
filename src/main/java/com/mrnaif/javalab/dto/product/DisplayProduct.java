@@ -3,7 +3,6 @@ package com.mrnaif.javalab.dto.product;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -11,10 +10,9 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class DisplayProduct extends BaseProduct {
 
-    private Long id;
+  private Long id;
 
-    private Set<ProductStoreInfo> stores = new HashSet<>();
+  private Set<ProductStoreInfo> stores = new HashSet<>();
 
-    private Instant created;
-
+  private Instant created;
 }

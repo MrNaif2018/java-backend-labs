@@ -5,8 +5,7 @@ import lombok.Data;
 @Data
 public class BaseStore {
 
-    private String name;
+  private String name;
 
-    private String email;
-
+  private String email;
 }

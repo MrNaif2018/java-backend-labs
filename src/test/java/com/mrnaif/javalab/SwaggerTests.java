@@ -10,17 +10,15 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class SwaggerUITests {
+class SwaggerTests {
 
-    @LocalServerPort
-    private int port;
+  @LocalServerPort private int port;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+  @Autowired private TestRestTemplate restTemplate;
 
-    @Test
-    void swaggerUIAtRoot() {
-        assertThat(this.restTemplate.getForObject("http://localhost:" + port,
-                String.class)).contains("Swagger UI");
-    }
+  @Test
+  void swaggerAtRoot() {
+    assertThat(this.restTemplate.getForObject("http://localhost:" + port, String.class))
+        .contains("Swagger UI");
+  }
 }

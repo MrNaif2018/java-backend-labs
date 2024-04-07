@@ -2,12 +2,11 @@ package com.mrnaif.javalab.service;
 
 public interface StorageService {
 
-    void init();
+  void init();
 
-    String store(String filename, byte[] data);
+  String store(String filename, byte[] data);
 
-    byte[] load(String filename);
+  byte[] load(String filename);
 
-    void deleteAll();
-
+  void deleteAll();
 }

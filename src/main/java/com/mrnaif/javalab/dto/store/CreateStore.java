@@ -7,6 +7,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CreateStore extends BaseStore {
 
-    private Long userId;
-
+  private Long userId;
 }

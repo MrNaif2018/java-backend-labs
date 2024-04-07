@@ -7,6 +7,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CreateProduct extends BaseProduct {
 
-    private Long userId;
-
+  private Long userId;
 }

@@ -7,6 +7,5 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class CreateUser extends BaseUser {
 
-    private String password;
-
+  private String password;
 }
