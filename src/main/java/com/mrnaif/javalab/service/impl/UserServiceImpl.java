@@ -1,9 +1,11 @@
 package com.mrnaif.javalab.service.impl;
 
+import com.mrnaif.javalab.aspect.Logging;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.user.CreateUser;
 import com.mrnaif.javalab.dto.user.DisplayUser;
 import com.mrnaif.javalab.exception.InvalidRequestException;
+import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.repository.UserRepository;
 import com.mrnaif.javalab.service.UserService;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
+@Logging
 public class UserServiceImpl implements UserService {
   private UserRepository userRepository;
   private PasswordEncoder passwordEncoder;
@@ -50,8 +53,8 @@ public class UserServiceImpl implements UserService {
   }
 
   public DisplayUser createUser(CreateUser user) {
-    user.setPassword(passwordEncoder.encode(user.getPassword()));
     try {
+      user.setPassword(passwordEncoder.encode(user.getPassword()));
       return modelMapper.map(
           userRepository.save(modelMapper.map(user, User.class)), DisplayUser.class);
     } catch (Exception e) {
@@ -77,19 +80,28 @@ public class UserServiceImpl implements UserService {
     return pageResponse;
   }
 
-  public Optional<DisplayUser> getUserById(Long id) {
-    User user = cache.get(id).orElseGet(() -> userRepository.findById(id).orElse(null));
-    if (user == null) {
-      return Optional.empty();
-    }
+  public DisplayUser getUserById(Long id) {
+    User user =
+        cache
+            .get(id)
+            .orElseGet(
+                () ->
+                    userRepository
+                        .findById(id)
+                        .orElseThrow(
+                            () -> new ResourceNotFoundException("User not found with id = " + id)));
     cache.put(id, user);
-    return Optional.of(modelMapper.map(user, DisplayUser.class));
+    return modelMapper.map(user, DisplayUser.class);
   }
 
   public DisplayUser updateUser(Long id, CreateUser createUser) {
     User user = modelMapper.map(createUser, User.class);
     user.setId(id); // to allow hibernate to find existing instance
-    userRepository.saveAndFlush(user);
+    try {
+      userRepository.saveAndFlush(user);
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
     cache.invalidate(id);
     // required to return proper fields like created unfortunately
     User managedUser = entityManager.find(User.class, user.getId());
@@ -103,17 +115,21 @@ public class UserServiceImpl implements UserService {
       return null;
     }
     User user = optionalUser.get();
-    if (updates.containsKey("created")) {
-      user.setCreated(Instant.parse(updates.remove("created").toString()));
+    try {
+      if (updates.containsKey("created")) {
+        user.setCreated(Instant.parse(updates.remove("created").toString()));
+      }
+      if (updates.containsKey("password")) {
+        user.setPassword(passwordEncoder.encode(updates.remove("password").toString()));
+      }
+      BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(user);
+      beanWrapper.setPropertyValues(updates);
+      userRepository.saveAndFlush(user);
+      cache.invalidate(id);
+      entityManager.refresh(user);
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
     }
-    if (updates.containsKey("password")) {
-      user.setPassword(passwordEncoder.encode(updates.remove("password").toString()));
-    }
-    BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(user);
-    beanWrapper.setPropertyValues(updates);
-    userRepository.saveAndFlush(user);
-    cache.invalidate(id);
-    entityManager.refresh(user);
     return modelMapper.map(user, DisplayUser.class);
   }
 

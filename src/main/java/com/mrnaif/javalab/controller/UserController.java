@@ -48,7 +48,7 @@ public class UserController {
   @GetMapping("/{id}")
   public ResponseEntity<DisplayUser> getUserById(@PathVariable Long id) {
     // of allows to return 404 if optional is not present()
-    return ResponseEntity.of(userService.getUserById(id));
+    return ResponseEntity.ok(userService.getUserById(id));
   }
 
   @PutMapping("/{id}")

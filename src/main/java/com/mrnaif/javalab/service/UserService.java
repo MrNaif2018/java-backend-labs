@@ -4,7 +4,6 @@ import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.user.CreateUser;
 import com.mrnaif.javalab.dto.user.DisplayUser;
 import java.util.Map;
-import java.util.Optional;
 
 public interface UserService {
 
@@ -12,7 +11,7 @@ public interface UserService {
 
   PageResponse<DisplayUser> getAllUsers(Integer page, Integer size);
 
-  Optional<DisplayUser> getUserById(Long id);
+  DisplayUser getUserById(Long id);
 
   DisplayUser updateUser(Long id, CreateUser user);
 

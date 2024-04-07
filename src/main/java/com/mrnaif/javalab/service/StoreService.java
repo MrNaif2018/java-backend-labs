@@ -5,7 +5,6 @@ import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
 import java.util.Map;
-import java.util.Optional;
 
 public interface StoreService {
 
@@ -13,7 +12,7 @@ public interface StoreService {
 
   PageResponse<DisplayStore> getAllStores(Integer page, Integer size);
 
-  Optional<DisplayStore> getStoreById(Long id);
+  DisplayStore getStoreById(Long id);
 
   DisplayStore updateStore(Long id, CreateStore store);
 

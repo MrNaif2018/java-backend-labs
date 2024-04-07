@@ -1,5 +1,6 @@
 package com.mrnaif.javalab.service.impl;
 
+import com.mrnaif.javalab.aspect.Logging;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
@@ -22,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -32,6 +34,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
+@Logging
 public class StoreServiceImpl implements StoreService {
   private StoreRepository storeRepository;
   private ProductRepository productRepository;
@@ -80,19 +83,28 @@ public class StoreServiceImpl implements StoreService {
     return pageResponse;
   }
 
-  public Optional<DisplayStore> getStoreById(Long id) {
-    Store store = cache.get(id).orElseGet(() -> storeRepository.findById(id).orElse(null));
-    if (store == null) {
-      return Optional.empty();
-    }
+  public DisplayStore getStoreById(Long id) {
+    Store store =
+        cache
+            .get(id)
+            .orElseGet(
+                () ->
+                    storeRepository
+                        .findById(id)
+                        .orElseThrow(
+                            () -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND + id)));
     cache.put(id, store);
-    return Optional.of(modelMapper.map(store, DisplayStore.class));
+    return modelMapper.map(store, DisplayStore.class);
   }
 
   public DisplayStore updateStore(Long id, CreateStore createStore) {
     Store store = modelMapper.map(createStore, Store.class);
     store.setId(id); // to allow hibernate to find existing instance
-    storeRepository.saveAndFlush(store);
+    try {
+      storeRepository.saveAndFlush(store);
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
     cache.invalidate(id);
     // required to return proper fields like created unfortunately
     Store managedStore = entityManager.find(Store.class, store.getId());
@@ -106,14 +118,18 @@ public class StoreServiceImpl implements StoreService {
       return null;
     }
     Store store = optionalStore.get();
-    if (updates.containsKey("created")) {
-      store.setCreated(Instant.parse(updates.remove("created").toString()));
+    try {
+      if (updates.containsKey("created")) {
+        store.setCreated(Instant.parse(updates.remove("created").toString()));
+      }
+      BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(store);
+      beanWrapper.setPropertyValues(updates);
+      storeRepository.saveAndFlush(store);
+      cache.invalidate(id);
+      entityManager.refresh(store);
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
     }
-    BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(store);
-    beanWrapper.setPropertyValues(updates);
-    storeRepository.saveAndFlush(store);
-    cache.invalidate(id);
-    entityManager.refresh(store);
     return modelMapper.map(store, DisplayStore.class);
   }
 
@@ -122,7 +138,7 @@ public class StoreServiceImpl implements StoreService {
         storeRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND + id));
-    store.getProducts().forEach(product -> product.removeStore(id));
+    Set.copyOf(store.getProducts()).forEach(product -> product.removeStore(id));
     storeRepository.deleteById(id);
     cache.invalidate(id);
   }
@@ -133,11 +149,16 @@ public class StoreServiceImpl implements StoreService {
             .findById(storeId)
             .orElseThrow(
                 () -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND + storeId));
-    Product product =
-        productRepository
-            .findById(productId)
-            .orElseThrow(
-                () -> new ResourceNotFoundException("Product not found with id = " + productId));
+    Product product;
+    try {
+      product =
+          productRepository
+              .findById(productId)
+              .orElseThrow(
+                  () -> new ResourceNotFoundException("Product not found with id = " + productId));
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
     store.addProduct(product);
     Store savedStore = storeRepository.save(store);
     cache.invalidate(storeId);

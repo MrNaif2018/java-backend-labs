@@ -1,5 +1,6 @@
 package com.mrnaif.javalab.service.impl;
 
+import com.mrnaif.javalab.aspect.Logging;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -28,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
+@Logging
 public class ProductServiceImpl implements ProductService {
   private ProductRepository productRepository;
 
@@ -73,19 +76,30 @@ public class ProductServiceImpl implements ProductService {
     return pageResponse;
   }
 
-  public Optional<DisplayProduct> getProductById(Long id) {
-    Product product = cache.get(id).orElseGet(() -> productRepository.findById(id).orElse(null));
-    if (product == null) {
-      return Optional.empty();
-    }
+  public DisplayProduct getProductById(Long id) {
+    Product product =
+        cache
+            .get(id)
+            .orElseGet(
+                () ->
+                    productRepository
+                        .findById(id)
+                        .orElseThrow(
+                            () ->
+                                new ResourceNotFoundException(
+                                    "Product not found with id = " + id)));
     cache.put(id, product);
-    return Optional.of(modelMapper.map(product, DisplayProduct.class));
+    return modelMapper.map(product, DisplayProduct.class);
   }
 
   public DisplayProduct updateProduct(Long id, CreateProduct createProduct) {
     Product product = modelMapper.map(createProduct, Product.class);
     product.setId(id); // to allow hibernate to find existing instance
-    productRepository.saveAndFlush(product);
+    try {
+      productRepository.saveAndFlush(product);
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
     cache.invalidate(id);
     // required to return proper fields like created unfortunately
     Product managedProduct = entityManager.find(Product.class, product.getId());
@@ -99,15 +113,19 @@ public class ProductServiceImpl implements ProductService {
       return null;
     }
     Product product = optionalProduct.get();
-    if (updates.containsKey("created")) {
-      product.setCreated(Instant.parse(updates.remove("created").toString()));
+    try {
+      if (updates.containsKey("created")) {
+        product.setCreated(Instant.parse(updates.remove("created").toString()));
+      }
+      BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(product);
+      beanWrapper.setPropertyValues(updates);
+      productRepository.saveAndFlush(product);
+      cache.invalidate(id);
+      entityManager.refresh(product);
+      return modelMapper.map(product, DisplayProduct.class);
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
     }
-    BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(product);
-    beanWrapper.setPropertyValues(updates);
-    productRepository.saveAndFlush(product);
-    cache.invalidate(id);
-    entityManager.refresh(product);
-    return modelMapper.map(product, DisplayProduct.class);
   }
 
   public void deleteProduct(Long id) {
@@ -115,7 +133,7 @@ public class ProductServiceImpl implements ProductService {
         productRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Product not found with id = " + id));
-    product.getStores().forEach(store -> store.removeProduct(id));
+    Set.copyOf(product.getStores()).forEach(store -> store.removeProduct(id));
     productRepository.deleteById(id);
     cache.invalidate(id);
   }

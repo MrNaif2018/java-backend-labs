@@ -37,3 +37,5 @@ build/
 ### Upload dirs ###
 upload/
 test-upload/
+
+logs/app.log

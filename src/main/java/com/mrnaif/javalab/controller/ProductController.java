@@ -48,7 +48,7 @@ public class ProductController {
   @GetMapping("/{id}")
   public ResponseEntity<DisplayProduct> getProductById(@PathVariable Long id) {
     // of allows to return 404 if optional is not present()
-    return ResponseEntity.of(productService.getProductById(id));
+    return ResponseEntity.ok(productService.getProductById(id));
   }
 
   @PutMapping("/{id}")

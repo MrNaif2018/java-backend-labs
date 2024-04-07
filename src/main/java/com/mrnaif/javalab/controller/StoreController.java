@@ -50,7 +50,7 @@ public class StoreController {
   @GetMapping("/{id}")
   public ResponseEntity<DisplayStore> getStoreById(@PathVariable Long id) {
     // of allows to return 404 if optional is not present()
-    return ResponseEntity.of(storeService.getStoreById(id));
+    return ResponseEntity.ok(storeService.getStoreById(id));
   }
 
   @PutMapping("/{id}")

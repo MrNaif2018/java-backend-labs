@@ -4,7 +4,6 @@ import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
 import java.util.Map;
-import java.util.Optional;
 
 public interface ProductService {
 
@@ -12,7 +11,7 @@ public interface ProductService {
 
   PageResponse<DisplayProduct> getAllProducts(Integer page, Integer size);
 
-  Optional<DisplayProduct> getProductById(Long id);
+  DisplayProduct getProductById(Long id);
 
   DisplayProduct updateProduct(Long id, CreateProduct product);
 
