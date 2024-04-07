@@ -1,5 +1,6 @@
 package com.mrnaif.javalab.controller;
 
+import com.mrnaif.javalab.aop.annotation.RequestStats;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/products")
+@RequestStats
 public class ProductController {
 
   private ProductService productService;

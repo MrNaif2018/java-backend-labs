@@ -1,6 +1,6 @@
 package com.mrnaif.javalab.service.impl;
 
-import com.mrnaif.javalab.aspect.Logging;
+import com.mrnaif.javalab.aop.annotation.Logging;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;

@@ -1,4 +1,4 @@
-package com.mrnaif.javalab.aspect;
+package com.mrnaif.javalab.aop.aspect;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 class LogMethodStatsAspect {
-  @Around("@within(Logging) || @annotation(Logging)")
+  @Around(
+      "@within(com.mrnaif.javalab.aop.annotation.Logging) ||"
+          + " @annotation(com.mrnaif.javalab.aop.annotation.Logging)")
   public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
     String methodName = joinPoint.getSignature().getName();
     Object[] args = joinPoint.getArgs();

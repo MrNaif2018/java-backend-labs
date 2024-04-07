@@ -1,5 +1,6 @@
 package com.mrnaif.javalab.controller;
 
+import com.mrnaif.javalab.aop.annotation.RequestStats;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.user.CreateUser;
 import com.mrnaif.javalab.dto.user.DisplayUser;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/users")
+@RequestStats
 public class UserController {
 
   private UserService userService;

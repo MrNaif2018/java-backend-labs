@@ -1,4 +1,4 @@
-package com.mrnaif.javalab.aspect;
+package com.mrnaif.javalab.aop.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
