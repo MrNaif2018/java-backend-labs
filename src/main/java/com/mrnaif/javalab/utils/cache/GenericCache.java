@@ -2,11 +2,11 @@ package com.mrnaif.javalab.utils.cache;
 
 import java.util.Optional;
 
-public interface GenericCache<K, T> {
+public interface GenericCache<K, V> {
 
-  void put(K key, T value);
+  void put(K key, V value);
 
-  Optional<T> get(K key);
+  Optional<V> get(K key);
 
   void invalidate(K key);
 

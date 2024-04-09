@@ -17,8 +17,7 @@ public class SimpleCache<K, V> implements GenericCache<K, V> {
   }
 
   public Optional<V> get(K key) {
-    V value = cache.get(key);
-    return Optional.ofNullable(value);
+    return Optional.ofNullable(cache.get(key));
   }
 
   public void invalidate(K key) {

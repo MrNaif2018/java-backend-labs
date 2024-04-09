@@ -10,6 +10,7 @@ import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.repository.UserRepository;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppUtils;
+import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,11 +46,11 @@ public class UserServiceImpl implements UserService {
       UserRepository userRepository,
       PasswordEncoder passwordEncoder,
       ModelMapper modelMapper,
-      GenericCache<Long, User> cache) {
+      CacheFactory cacheFactory) {
     this.userRepository = userRepository;
     this.passwordEncoder = passwordEncoder;
     this.modelMapper = modelMapper;
-    this.cache = cache;
+    this.cache = cacheFactory.getCache(User.class);
   }
 
   public DisplayUser createUser(CreateUser user) {

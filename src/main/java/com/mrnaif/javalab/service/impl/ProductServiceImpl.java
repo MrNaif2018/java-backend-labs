@@ -7,9 +7,11 @@ import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
+import com.mrnaif.javalab.model.Store;
 import com.mrnaif.javalab.repository.ProductRepository;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppUtils;
+import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -39,14 +41,14 @@ public class ProductServiceImpl implements ProductService {
   ModelMapper modelMapper;
 
   GenericCache<Long, Product> cache;
+  GenericCache<Long, Store> storeCache;
 
   public ProductServiceImpl(
-      ProductRepository productRepository,
-      ModelMapper modelMapper,
-      GenericCache<Long, Product> cache) {
+      ProductRepository productRepository, ModelMapper modelMapper, CacheFactory cacheFactory) {
     this.productRepository = productRepository;
     this.modelMapper = modelMapper;
-    this.cache = cache;
+    this.cache = cacheFactory.getCache(Product.class);
+    this.storeCache = cacheFactory.getCache(Store.class);
   }
 
   public DisplayProduct createProduct(CreateProduct product) {
@@ -133,7 +135,12 @@ public class ProductServiceImpl implements ProductService {
         productRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Product not found with id = " + id));
-    Set.copyOf(product.getStores()).forEach(store -> store.removeProduct(id));
+    Set.copyOf(product.getStores())
+        .forEach(
+            store -> {
+              store.removeProduct(id);
+              storeCache.invalidate(store.getId());
+            });
     productRepository.deleteById(id);
     cache.invalidate(id);
   }

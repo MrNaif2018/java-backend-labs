@@ -14,6 +14,7 @@ import com.mrnaif.javalab.repository.StoreRepository;
 import com.mrnaif.javalab.service.StoreService;
 import com.mrnaif.javalab.utils.AppConstant;
 import com.mrnaif.javalab.utils.AppUtils;
+import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -44,16 +45,18 @@ public class StoreServiceImpl implements StoreService {
   ModelMapper modelMapper;
 
   GenericCache<Long, Store> cache;
+  GenericCache<Long, Product> productCache;
 
   public StoreServiceImpl(
       StoreRepository storeRepository,
       ProductRepository productRepository,
       ModelMapper modelMapper,
-      GenericCache<Long, Store> cache) {
+      CacheFactory cacheFactory) {
     this.storeRepository = storeRepository;
     this.productRepository = productRepository;
     this.modelMapper = modelMapper;
-    this.cache = cache;
+    this.cache = cacheFactory.getCache(Store.class);
+    this.productCache = cacheFactory.getCache(Product.class);
   }
 
   public DisplayStore createStore(CreateStore store) {
@@ -138,7 +141,12 @@ public class StoreServiceImpl implements StoreService {
         storeRepository
             .findById(id)
             .orElseThrow(() -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND + id));
-    Set.copyOf(store.getProducts()).forEach(product -> product.removeStore(id));
+    Set.copyOf(store.getProducts())
+        .forEach(
+            product -> {
+              product.removeStore(id);
+              productCache.invalidate(product.getId());
+            });
     storeRepository.deleteById(id);
     cache.invalidate(id);
   }
@@ -162,6 +170,7 @@ public class StoreServiceImpl implements StoreService {
     store.addProduct(product);
     Store savedStore = storeRepository.save(store);
     cache.invalidate(storeId);
+    productCache.invalidate(productId);
     return modelMapper.map(savedStore, DisplayStore.class);
   }
 
@@ -173,6 +182,7 @@ public class StoreServiceImpl implements StoreService {
                 () -> new ResourceNotFoundException(AppConstant.STORE_NOT_FOUND + storeId));
     store.removeProduct(productId);
     cache.invalidate(storeId);
+    productCache.invalidate(productId);
     return modelMapper.map(storeRepository.save(store), DisplayStore.class);
   }
 
