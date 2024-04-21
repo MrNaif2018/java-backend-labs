@@ -63,6 +63,21 @@ public class UserServiceImpl implements UserService {
     }
   }
 
+  public List<DisplayUser> createBulkUsers(List<CreateUser> users) {
+    try {
+      return users.stream()
+          .map(
+              user -> {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                return userRepository.save(modelMapper.map(user, User.class));
+              })
+          .map(user -> modelMapper.map(user, DisplayUser.class))
+          .toList();
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
+  }
+
   public PageResponse<DisplayUser> getAllUsers(Integer page, Integer size) {
     AppUtils.validatePageAndSize(page, size);
     Pageable pageable = PageRequest.of(page - 1, size);

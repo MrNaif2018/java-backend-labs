@@ -6,8 +6,10 @@ import com.mrnaif.javalab.dto.user.CreateUser;
 import com.mrnaif.javalab.dto.user.DisplayUser;
 import com.mrnaif.javalab.service.UserService;
 import com.mrnaif.javalab.utils.AppConstant;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 @RequestStats
+@CrossOrigin(origins = "*")
 public class UserController {
 
   private UserService userService;
@@ -33,6 +36,11 @@ public class UserController {
   @PostMapping
   public ResponseEntity<DisplayUser> createUser(@RequestBody CreateUser user) {
     return ResponseEntity.ok(userService.createUser(user));
+  }
+
+  @PostMapping("/bulk")
+  public ResponseEntity<List<DisplayUser>> createBulkUsers(@RequestBody List<CreateUser> users) {
+    return ResponseEntity.ok(userService.createBulkUsers(users));
   }
 
   @GetMapping

@@ -8,8 +8,10 @@ import com.mrnaif.javalab.dto.store.DisplayStore;
 import com.mrnaif.javalab.dto.store.EditProductsRequest;
 import com.mrnaif.javalab.service.StoreService;
 import com.mrnaif.javalab.utils.AppConstant;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/stores")
 @RequestStats
+@CrossOrigin(origins = "*")
 public class StoreController {
 
   private StoreService storeService;
@@ -35,6 +38,12 @@ public class StoreController {
   @PostMapping
   public ResponseEntity<DisplayStore> createStore(@RequestBody CreateStore store) {
     return ResponseEntity.ok(storeService.createStore(store));
+  }
+
+  @PostMapping("/bulk")
+  public ResponseEntity<List<DisplayStore>> createBulkStores(
+      @RequestBody List<CreateStore> stores) {
+    return ResponseEntity.ok(storeService.createBulkStores(stores));
   }
 
   @GetMapping

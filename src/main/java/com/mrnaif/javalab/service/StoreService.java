@@ -4,11 +4,14 @@ import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
+import java.util.List;
 import java.util.Map;
 
 public interface StoreService {
 
   DisplayStore createStore(CreateStore store);
+
+  List<DisplayStore> createBulkStores(List<CreateStore> stores);
 
   PageResponse<DisplayStore> getAllStores(Integer page, Integer size);
 

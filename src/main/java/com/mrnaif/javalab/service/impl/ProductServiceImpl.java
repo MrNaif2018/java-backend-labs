@@ -60,6 +60,17 @@ public class ProductServiceImpl implements ProductService {
     }
   }
 
+  public List<DisplayProduct> createBulkProducts(List<CreateProduct> products) {
+    try {
+      return products.stream()
+          .map(product -> productRepository.save(modelMapper.map(product, Product.class)))
+          .map(product -> modelMapper.map(product, DisplayProduct.class))
+          .toList();
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
+  }
+
   public PageResponse<DisplayProduct> getAllProducts(Integer page, Integer size) {
     AppUtils.validatePageAndSize(page, size);
     Pageable pageable = PageRequest.of(page - 1, size);

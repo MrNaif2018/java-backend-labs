@@ -68,6 +68,17 @@ public class StoreServiceImpl implements StoreService {
     }
   }
 
+  public List<DisplayStore> createBulkStores(List<CreateStore> stores) {
+    try {
+      return stores.stream()
+          .map(store -> storeRepository.save(modelMapper.map(store, Store.class)))
+          .map(store -> modelMapper.map(store, DisplayStore.class))
+          .toList();
+    } catch (Exception e) {
+      throw new InvalidRequestException(e.getMessage());
+    }
+  }
+
   public PageResponse<DisplayStore> getAllStores(Integer page, Integer size) {
     AppUtils.validatePageAndSize(page, size);
     Pageable pageable = PageRequest.of(page - 1, size);

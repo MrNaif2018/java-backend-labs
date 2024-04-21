@@ -6,8 +6,10 @@ import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppConstant;
+import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/products")
 @RequestStats
+@CrossOrigin(origins = "*")
 public class ProductController {
 
   private ProductService productService;
@@ -33,6 +36,12 @@ public class ProductController {
   @PostMapping
   public ResponseEntity<DisplayProduct> createProduct(@RequestBody CreateProduct product) {
     return ResponseEntity.ok(productService.createProduct(product));
+  }
+
+  @PostMapping("/bulk")
+  public ResponseEntity<List<DisplayProduct>> createBulkProducts(
+      @RequestBody List<CreateProduct> products) {
+    return ResponseEntity.ok(productService.createBulkProducts(products));
   }
 
   @GetMapping
