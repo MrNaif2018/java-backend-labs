@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: web
+    runtime: docker
+    region: frankfurt
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: SPRING_DB_USER
+        fromDatabase:
+          name: elephant
+          property: user
+      - key: SPRING_DB_PASSWORD
+        fromDatabase:
+          name: elephant
+          property: password
+      - key: SPRING_DB_URL
+        value: postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/${SPRING_DATASOURCE_SCHEMA}
+
+databases:
+  - name: database
+    region: frankfurt
+    plan: free
