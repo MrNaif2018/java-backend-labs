@@ -17,6 +17,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -49,6 +50,7 @@ public class Product {
 
   @ManyToMany(mappedBy = "products")
   @EqualsAndHashCode.Exclude
+  @ToString.Exclude
   private Set<Store> stores = new HashSet<>();
 
   @CreatedDate

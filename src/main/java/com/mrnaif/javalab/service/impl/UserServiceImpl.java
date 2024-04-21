@@ -113,11 +113,7 @@ public class UserServiceImpl implements UserService {
   public DisplayUser updateUser(Long id, CreateUser createUser) {
     User user = modelMapper.map(createUser, User.class);
     user.setId(id); // to allow hibernate to find existing instance
-    try {
-      userRepository.saveAndFlush(user);
-    } catch (Exception e) {
-      throw new InvalidRequestException(e.getMessage());
-    }
+    userRepository.saveAndFlush(user);
     cache.invalidate(id);
     // required to return proper fields like created unfortunately
     User managedUser = entityManager.find(User.class, user.getId());
@@ -131,21 +127,17 @@ public class UserServiceImpl implements UserService {
       return null;
     }
     User user = optionalUser.get();
-    try {
-      if (updates.containsKey("created")) {
-        user.setCreated(Instant.parse(updates.remove("created").toString()));
-      }
-      if (updates.containsKey("password")) {
-        user.setPassword(passwordEncoder.encode(updates.remove("password").toString()));
-      }
-      BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(user);
-      beanWrapper.setPropertyValues(updates);
-      userRepository.saveAndFlush(user);
-      cache.invalidate(id);
-      entityManager.refresh(user);
-    } catch (Exception e) {
-      throw new InvalidRequestException(e.getMessage());
+    if (updates.containsKey("created")) {
+      user.setCreated(Instant.parse(updates.remove("created").toString()));
     }
+    if (updates.containsKey("password")) {
+      user.setPassword(passwordEncoder.encode(updates.remove("password").toString()));
+    }
+    BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(user);
+    beanWrapper.setPropertyValues(updates);
+    userRepository.saveAndFlush(user);
+    cache.invalidate(id);
+    entityManager.refresh(user);
     return modelMapper.map(user, DisplayUser.class);
   }
 

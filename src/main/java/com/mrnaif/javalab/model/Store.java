@@ -19,6 +19,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -49,6 +50,7 @@ public class Store {
       joinColumns = {@JoinColumn(name = "store_id")},
       inverseJoinColumns = {@JoinColumn(name = "product_id")})
   @EqualsAndHashCode.Exclude
+  @ToString.Exclude
   private Set<Product> products = new HashSet<>();
 
   @CreatedDate
