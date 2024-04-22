@@ -8,11 +8,11 @@ services:
     envVars:
       - key: SPRING_DB_USER
         fromDatabase:
-          name: elephant
+          name: database
           property: user
       - key: SPRING_DB_PASSWORD
         fromDatabase:
-          name: elephant
+          name: database
           property: password
       - key: SPRING_DB_URL
         value: postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/${SPRING_DATASOURCE_SCHEMA}
