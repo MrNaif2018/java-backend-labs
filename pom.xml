@@ -87,12 +87,6 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.8.12</version>
-				<configuration>
-					<excludes>
-						<exclude>com/mrnaif/javalab/controller/**</exclude>
-						<exclude>com/mrnaif/javalab/aop/aspect/**</exclude>
-					</excludes>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>
