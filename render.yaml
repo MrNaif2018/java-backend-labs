@@ -15,7 +15,7 @@ services:
           name: database
           property: password
       - key: SPRING_DB_URL
-        value: postgresql://${SPRING_DATASOURCE_HOST}:${SPRING_DATASOURCE_PORT}/${SPRING_DATASOURCE_SCHEMA}
+        value: postgresql://${SPRING_DB_HOST}:${SPRING_DB_PORT}/${SPRING_DB_DATABASE}
 
 databases:
   - name: database
