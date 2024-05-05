@@ -1,12 +1,9 @@
 package com.mrnaif.javalab;
 
 import com.mrnaif.javalab.config.StorageProperties;
-import com.mrnaif.javalab.service.StorageService;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication
@@ -16,10 +13,5 @@ public class JavaLabApplication {
 
   public static void main(String[] args) {
     SpringApplication.run(JavaLabApplication.class, args);
-  }
-
-  @Bean
-  CommandLineRunner init(StorageService storageService) {
-    return args -> storageService.init();
   }
 }
