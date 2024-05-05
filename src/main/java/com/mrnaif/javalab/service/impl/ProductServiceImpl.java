@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -154,8 +153,7 @@ public class ProductServiceImpl implements ProductService {
                 });
         @SuppressWarnings("unchecked")
         List<Integer> storeIdsInt = (List<Integer>) updates.remove("stores");
-        List<Long> storeIds =
-            storeIdsInt.stream().map(Integer::longValue).collect(Collectors.toList());
+        List<Long> storeIds = storeIdsInt.stream().map(Integer::longValue).toList();
         storeIds.forEach(
             stId -> {
               Store store =
