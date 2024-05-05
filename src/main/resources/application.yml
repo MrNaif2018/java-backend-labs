@@ -22,3 +22,4 @@ springdoc:
 server:
   port: ${PORT:8080}
   use-forward-headers: true
+  forward-headers-strategy: framework
