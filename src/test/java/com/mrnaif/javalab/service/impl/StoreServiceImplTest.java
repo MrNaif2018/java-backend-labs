@@ -11,6 +11,7 @@ import static org.mockito.Mockito.*;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
+import com.mrnaif.javalab.dto.store.StoreProductInfo;
 import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
@@ -204,6 +205,29 @@ class StoreServiceImplTest {
     assertEquals("New Store", updated.getName());
     assertEquals(now, updated.getCreated());
     verify(cache, times(1)).invalidate(1L);
+  }
+
+  @Test
+  void testPartialUpdateStoreWithProducts() {
+    store.addProduct(product);
+    when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+    when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+    DisplayStore updated =
+        modelMapper.map(
+            storeService.partialUpdateStore(
+                store.getId(),
+                new HashMap<>() {
+                  {
+                    put("products", List.of(product.getId().intValue()));
+                    put("userEmail", "");
+                  }
+                }),
+            DisplayStore.class);
+
+    assertNotNull(updated);
+    assertEquals(modelMapper.map(product, StoreProductInfo.class), updated.getProducts().get(0));
+    verify(cache, times(1)).invalidate(1L);
+    verify(productCache, times(2)).invalidate(1L);
   }
 
   @Test

@@ -11,12 +11,14 @@ import static org.mockito.Mockito.*;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
+import com.mrnaif.javalab.dto.product.ProductStoreInfo;
 import com.mrnaif.javalab.exception.InvalidRequestException;
 import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
 import com.mrnaif.javalab.model.Store;
 import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.repository.ProductRepository;
+import com.mrnaif.javalab.repository.StoreRepository;
 import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
@@ -47,6 +49,7 @@ class ProductServiceImplTest {
   @Mock private CacheFactory cacheFactory;
 
   @Mock private ProductRepository productRepository;
+  @Mock private StoreRepository storeRepository;
 
   @Mock private EntityManager entityManager;
 
@@ -60,6 +63,7 @@ class ProductServiceImplTest {
   @InjectMocks private ProductServiceImpl productService;
 
   private User user;
+  private Store store;
   private Product product;
 
   @BeforeEach
@@ -74,6 +78,7 @@ class ProductServiceImplTest {
             new ArrayList<>(),
             new ArrayList<>(),
             Instant.now());
+    store = new Store(1L, "Test Store", "store@store.com", user, new HashSet<>(), Instant.now());
     product =
         new Product(
             1L, "Test Product", 10.0, 10L, "Test Product", user, new HashSet<>(), Instant.now());
@@ -197,6 +202,30 @@ class ProductServiceImplTest {
     assertEquals("Test", updated.getDescription());
     assertEquals(now, updated.getCreated());
     verify(cache, times(1)).invalidate(1L);
+  }
+
+  @Test
+  void testPartialUpdateProductWithStores() {
+    product.addStore(store);
+    when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+    when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+    DisplayProduct updated =
+        modelMapper.map(
+            productService.partialUpdateProduct(
+                product.getId(),
+                new HashMap<>() {
+                  {
+                    put("stores", List.of(store.getId().intValue()));
+                    put("userEmail", "");
+                  }
+                }),
+            DisplayProduct.class);
+
+    assertNotNull(updated);
+    assertEquals(
+        modelMapper.map(store, ProductStoreInfo.class), updated.getStores().iterator().next());
+    verify(cache, times(1)).invalidate(1L);
+    verify(storeCache, times(2)).invalidate(1L);
   }
 
   @Test
