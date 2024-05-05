@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.mrnaif.javalab.dto.BatchDeleteRequest;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.user.CreateUser;
 import com.mrnaif.javalab.dto.user.DisplayUser;
@@ -153,6 +154,18 @@ class UserControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
 
     verify(userService, times(1)).deleteUser(userId);
+    verifyNoMoreInteractions(userService);
+  }
+
+  @Test
+  void bulkDeleteUsers() {
+    List<Long> userIds = List.of(1L, 2L, 3L);
+
+    ResponseEntity<Void> response = userController.deleteUsers(new BatchDeleteRequest(userIds));
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    verify(userService, times(1)).deleteUsers(userIds);
     verifyNoMoreInteractions(userService);
   }
 }

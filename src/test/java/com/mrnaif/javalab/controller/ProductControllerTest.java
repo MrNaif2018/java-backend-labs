@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.mrnaif.javalab.dto.BatchDeleteRequest;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
@@ -65,9 +66,13 @@ class ProductControllerTest {
         new PageResponse<DisplayProduct>(products, 3, 1, 10, 1, false);
 
     when(productService.getAllProducts(1, 10)).thenReturn(pageResponse);
+    when(productService.getProductsRange(1L, 1, 10)).thenReturn(pageResponse);
 
     ResponseEntity<PageResponse<DisplayProduct>> response =
         productController.getAllProducts(1, 10, "");
+    ResponseEntity<PageResponse<DisplayProduct>> response2 =
+        productController.getAllProducts(1, 10, "1");
+    assertEquals(3, response2.getBody().getResult().size());
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(products, response.getBody().getResult());
@@ -166,6 +171,19 @@ class ProductControllerTest {
     assertEquals(HttpStatus.OK, response.getStatusCode());
 
     verify(productService, times(1)).deleteProduct(productId);
+    verifyNoMoreInteractions(productService);
+  }
+
+  @Test
+  void bulkDeleteProducts() {
+    List<Long> productIds = List.of(1L, 2L, 3L);
+
+    ResponseEntity<Void> response =
+        productController.deleteProducts(new BatchDeleteRequest(productIds));
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    verify(productService, times(1)).deleteProducts(productIds);
     verifyNoMoreInteractions(productService);
   }
 } 

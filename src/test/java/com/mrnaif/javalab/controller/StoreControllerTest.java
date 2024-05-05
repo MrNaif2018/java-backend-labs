@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import com.mrnaif.javalab.dto.BatchDeleteRequest;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
@@ -62,8 +63,11 @@ class StoreControllerTest {
         new PageResponse<DisplayStore>(stores, 3, 1, 10, 1, false);
 
     when(storeService.getAllStores(1, 10)).thenReturn(pageResponse);
+    when(storeService.getStoresRange(1L, 1, 10)).thenReturn(pageResponse);
 
     ResponseEntity<PageResponse<DisplayStore>> response = storeController.getAllStores(1, 10, "");
+    ResponseEntity<PageResponse<DisplayStore>> response2 = storeController.getAllStores(1, 10, "1");
+    assertEquals(3, response2.getBody().getResult().size());
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals(stores, response.getBody().getResult());
@@ -116,6 +120,18 @@ class StoreControllerTest {
     assertEquals(displayStores, response.getBody());
 
     verify(storeService, times(1)).createBulkStores(createStores);
+    verifyNoMoreInteractions(storeService);
+  }
+
+  @Test
+  void bulkDeleteStores() {
+    List<Long> storeIds = List.of(1L, 2L, 3L);
+
+    ResponseEntity<Void> response = storeController.deleteStores(new BatchDeleteRequest(storeIds));
+
+    assertEquals(HttpStatus.OK, response.getStatusCode());
+
+    verify(storeService, times(1)).deleteStores(storeIds);
     verifyNoMoreInteractions(storeService);
   }
 
