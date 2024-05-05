@@ -3,6 +3,8 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=MrNaif2018_java-backend-labs&metric=alert_status)](https://sonarcloud.io/summary/overall?id=MrNaif2018_java-backend-labs)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=MrNaif2018_java-backend-labs&metric=security_rating)](https://sonarcloud.io/summary/overall?id=MrNaif2018_java-backend-labs)
 
+[Live demo](https://java-backend-labs-production.up.railway.app)
+
 This API provides endpoints to create and manage an unlimited number of stores, products, frontend, as well as a payment processing integration with [Bitcart](https://bitcart.ai)
 
 ## Setup
