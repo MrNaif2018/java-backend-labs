@@ -13,6 +13,7 @@ import com.mrnaif.javalab.model.Store;
 import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.service.StoreService;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,9 @@ class StoreControllerTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    user = new User(1L, "test@test.com", "password", Instant.now());
+    user =
+        new User(
+            1L, "test@test.com", "password", new ArrayList<>(), new ArrayList<>(), Instant.now());
     store = new Store(1L, "Test Store", "store@store.com", user, new HashSet<>(), Instant.now());
     createStore = modelMapper.map(store, CreateStore.class);
     displayStore = modelMapper.map(store, DisplayStore.class);
@@ -56,14 +59,14 @@ class StoreControllerTest {
   void getAllStores() {
     List<DisplayStore> stores = List.of(new DisplayStore(), new DisplayStore(), new DisplayStore());
     PageResponse<DisplayStore> pageResponse =
-        new PageResponse<DisplayStore>(stores, 1, 10, 3, 1, false);
+        new PageResponse<DisplayStore>(stores, 3, 1, 10, 1, false);
 
     when(storeService.getAllStores(1, 10)).thenReturn(pageResponse);
 
-    ResponseEntity<PageResponse<DisplayStore>> response = storeController.getAllStores(1, 10);
+    ResponseEntity<PageResponse<DisplayStore>> response = storeController.getAllStores(1, 10, "");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(stores, response.getBody().getContent());
+    assertEquals(stores, response.getBody().getResult());
 
     verify(storeService, times(1)).getAllStores(1, 10);
     verifyNoMoreInteractions(storeService);

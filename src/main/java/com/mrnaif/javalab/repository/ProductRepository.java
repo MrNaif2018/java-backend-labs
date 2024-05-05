@@ -10,14 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-  Page<Product> findProductsByStoresId(Long storeId, Pageable pageable);
+  Page<Product> findAllByOrderByCreatedDesc(Pageable pageable);
 
-  @Query(
-      "SELECT p FROM Product p JOIN p.stores s WHERE s.id = :store AND p.price >= :minPrice AND"
-          + " p.price <= :maxPrice AND p.quantity > 0")
-  Page<Product> findProductsByStoresIdAndPrice(
-      @Param("store") Long storeId,
-      @Param("minPrice") Double minPrice,
-      @Param("maxPrice") Double maxPrice,
-      Pageable pageable);
+  @Query("SELECT p FROM Product p JOIN p.stores s WHERE s.id = :store ORDER BY p.created DESC")
+  Page<Product> findProductsByStoresId(@Param("store") Long storeId, Pageable pageable);
 }

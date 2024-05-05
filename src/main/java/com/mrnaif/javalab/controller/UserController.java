@@ -1,6 +1,7 @@
 package com.mrnaif.javalab.controller;
 
 import com.mrnaif.javalab.aop.annotation.RequestStats;
+import com.mrnaif.javalab.dto.BatchDeleteRequest;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.user.CreateUser;
 import com.mrnaif.javalab.dto.user.DisplayUser;
@@ -9,6 +10,7 @@ import com.mrnaif.javalab.utils.AppConstant;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,7 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
+@CrossOrigin(origins = "*")
 @RequestStats
 public class UserController {
 
@@ -39,6 +42,12 @@ public class UserController {
   @PostMapping("/bulk")
   public ResponseEntity<List<DisplayUser>> createBulkUsers(@RequestBody List<CreateUser> users) {
     return ResponseEntity.ok(userService.createBulkUsers(users));
+  }
+
+  @PostMapping("/batch/delete")
+  public ResponseEntity<Void> deleteUsers(@RequestBody BatchDeleteRequest req) {
+    userService.deleteUsers(req.getIds());
+    return ResponseEntity.ok().build();
   }
 
   @GetMapping

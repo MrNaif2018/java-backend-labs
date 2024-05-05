@@ -21,4 +21,8 @@ public interface ProductService {
   DisplayProduct partialUpdateProduct(Long id, Map<String, Object> updates);
 
   void deleteProduct(Long id);
+
+  PageResponse<DisplayProduct> getProductsRange(Long storeId, Integer page, Integer size);
+
+  void deleteProducts(List<Long> ids);
 }

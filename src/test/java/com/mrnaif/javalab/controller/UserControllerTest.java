@@ -12,6 +12,7 @@ import com.mrnaif.javalab.dto.user.DisplayUser;
 import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.service.UserService;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,7 +44,9 @@ class UserControllerTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    user = new User(1L, "test@test.com", "password", Instant.now());
+    user =
+        new User(
+            1L, "test@test.com", "password", new ArrayList<>(), new ArrayList<>(), Instant.now());
     createUser = modelMapper.map(user, CreateUser.class);
     displayUser = modelMapper.map(user, DisplayUser.class);
   }
@@ -52,14 +55,14 @@ class UserControllerTest {
   void getAllUsers() {
     List<DisplayUser> users = List.of(new DisplayUser(), new DisplayUser(), new DisplayUser());
     PageResponse<DisplayUser> pageResponse =
-        new PageResponse<DisplayUser>(users, 1, 10, 3, 1, false);
+        new PageResponse<DisplayUser>(users, 3, 1, 10, 1, false);
 
     when(userService.getAllUsers(1, 10)).thenReturn(pageResponse);
 
     ResponseEntity<PageResponse<DisplayUser>> response = userController.getAllUsers(1, 10);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(users, response.getBody().getContent());
+    assertEquals(users, response.getBody().getResult());
 
     verify(userService, times(1)).getAllUsers(1, 10);
     verifyNoMoreInteractions(userService);

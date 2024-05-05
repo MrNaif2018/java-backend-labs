@@ -1,11 +1,16 @@
 package com.mrnaif.javalab.dto.product;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class CreateProduct extends BaseProduct {
+public class CreateProduct {
+  private String name;
+
+  private Double price;
+
+  private Long quantity;
+
+  private String description;
 
   private Long userId;
 }

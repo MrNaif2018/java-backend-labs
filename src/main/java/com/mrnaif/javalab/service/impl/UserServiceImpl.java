@@ -79,17 +79,22 @@ public class UserServiceImpl implements UserService {
   }
 
   public PageResponse<DisplayUser> getAllUsers(Integer page, Integer size) {
-    AppUtils.validatePageAndSize(page, size);
-    Pageable pageable = PageRequest.of(page - 1, size);
-    Page<User> objects = userRepository.findAll(pageable);
+    AppUtils.validatePagination(page);
+    Pageable pageable;
+    if (size == -1) {
+      pageable = Pageable.unpaged();
+    } else {
+      pageable = PageRequest.of(page - 1, size);
+    }
+    Page<User> objects = userRepository.findAllByOrderByCreatedDesc(pageable);
     List<DisplayUser> responses =
         Arrays.asList(modelMapper.map(objects.getContent(), DisplayUser[].class));
 
     PageResponse<DisplayUser> pageResponse = new PageResponse<>();
-    pageResponse.setContent(responses);
+    pageResponse.setResult(responses);
+    pageResponse.setCount(objects.getNumberOfElements());
     pageResponse.setSize(size);
     pageResponse.setPage(page);
-    pageResponse.setTotalElements(objects.getNumberOfElements());
     pageResponse.setTotalPages(objects.getTotalPages());
     pageResponse.setLast(objects.isLast());
 
@@ -144,5 +149,9 @@ public class UserServiceImpl implements UserService {
   public void deleteUser(Long id) {
     userRepository.deleteById(id);
     cache.invalidate(id);
+  }
+
+  public void deleteUsers(List<Long> ids) {
+    ids.forEach(this::deleteUser);
   }
 }

@@ -1,7 +1,6 @@
 package com.mrnaif.javalab.service;
 
 import com.mrnaif.javalab.dto.PageResponse;
-import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
 import java.util.List;
@@ -27,6 +26,7 @@ public interface StoreService {
 
   DisplayStore removeProductFromStore(Long storeId, Long productId);
 
-  PageResponse<DisplayProduct> getProductsRange(
-      Long storeId, Double minPrice, Double maxPrice, Integer page, Integer size);
+  PageResponse<DisplayStore> getStoresRange(Long productId, Integer page, Integer size);
+
+  void deleteStores(List<Long> ids);
 }

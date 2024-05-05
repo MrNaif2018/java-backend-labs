@@ -11,22 +11,22 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PageResponse<T> {
 
-  private List<T> content;
+  private List<T> result;
+  private long count;
   private int page;
   private int size;
-  private long totalElements;
   private int totalPages;
   private boolean last;
 
-  public List<T> getContent() {
-    return content == null ? null : new ArrayList<>(this.content);
+  public List<T> getResult() {
+    return result == null ? null : new ArrayList<>(this.result);
   }
 
-  public void setContent(List<T> content) {
-    if (content == null) {
-      this.content = null;
+  public void setResult(List<T> result) {
+    if (result == null) {
+      this.result = null;
     } else {
-      this.content = content;
+      this.result = result;
     }
   }
 }

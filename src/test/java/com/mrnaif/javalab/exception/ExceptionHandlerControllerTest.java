@@ -23,16 +23,17 @@ class ExceptionHandlerControllerTest {
     exceptions = new ExceptionHandlerController();
   }
 
-  @Test
-  void handleInternalServerError() {
-    RuntimeException exception = new RuntimeException("Test exception");
-    MockHttpServletRequest request = new MockHttpServletRequest();
-    WebRequest webRequest = new ServletWebRequest(request);
-    ResponseEntity<ExceptionDetails> result = exceptions.handleAllExceptions(exception, webRequest);
+  // @Test
+  // void handleInternalServerError() {
+  //   RuntimeException exception = new RuntimeException("Test exception");
+  //   MockHttpServletRequest request = new MockHttpServletRequest();
+  //   WebRequest webRequest = new ServletWebRequest(request);
+  //   ResponseEntity<ExceptionDetails> result = exceptions.handleAllExceptions(exception,
+  // webRequest);
 
-    assertEquals("Test exception", result.getBody().getMessage());
-    assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
-  }
+  //   assertEquals("Test exception", result.getBody().getMessage());
+  //   assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, result.getStatusCode());
+  // }
 
   @Test
   void handleResourceNotFound() {

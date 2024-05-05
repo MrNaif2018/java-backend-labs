@@ -1,8 +1,8 @@
 package com.mrnaif.javalab.controller;
 
 import com.mrnaif.javalab.aop.annotation.RequestStats;
+import com.mrnaif.javalab.dto.BatchDeleteRequest;
 import com.mrnaif.javalab.dto.PageResponse;
-import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
 import com.mrnaif.javalab.dto.store.EditProductsRequest;
@@ -11,6 +11,7 @@ import com.mrnaif.javalab.utils.AppConstant;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -23,7 +24,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/stores")
+@RequestMapping("/stores")
+@CrossOrigin(origins = "*")
 @RequestStats
 public class StoreController {
 
@@ -44,6 +46,12 @@ public class StoreController {
     return ResponseEntity.ok(storeService.createBulkStores(stores));
   }
 
+  @PostMapping("/batch/delete")
+  public ResponseEntity<Void> deleteStores(@RequestBody BatchDeleteRequest req) {
+    storeService.deleteStores(req.getIds());
+    return ResponseEntity.ok().build();
+  }
+
   @GetMapping
   public ResponseEntity<PageResponse<DisplayStore>> getAllStores(
       @RequestParam(
@@ -52,7 +60,11 @@ public class StoreController {
               defaultValue = AppConstant.DEFAULT_PAGE_NUMBER)
           Integer page,
       @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE)
-          Integer size) {
+          Integer size,
+      @RequestParam(value = "query", required = false, defaultValue = "") String query) {
+    if (!query.isEmpty()) {
+      return ResponseEntity.ok(storeService.getStoresRange(Long.parseLong(query), page, size));
+    }
     return ResponseEntity.ok(storeService.getAllStores(page, size));
   }
 
@@ -91,20 +103,5 @@ public class StoreController {
       @PathVariable Long id, @RequestBody EditProductsRequest request) {
     storeService.removeProductFromStore(id, request.getProductId());
     return ResponseEntity.ok().build();
-  }
-
-  @GetMapping("/{id}/products")
-  public PageResponse<DisplayProduct> getProductsByStoreIdAndPrice(
-      @PathVariable Long id,
-      @RequestParam("minPrice") Double minPrice,
-      @RequestParam("maxPrice") Double maxPrice,
-      @RequestParam(
-              value = "page",
-              required = false,
-              defaultValue = AppConstant.DEFAULT_PAGE_NUMBER)
-          Integer page,
-      @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE)
-          Integer size) {
-    return storeService.getProductsRange(id, minPrice, maxPrice, page, size);
   }
 }

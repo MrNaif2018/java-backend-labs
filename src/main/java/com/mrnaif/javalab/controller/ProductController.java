@@ -1,6 +1,7 @@
 package com.mrnaif.javalab.controller;
 
 import com.mrnaif.javalab.aop.annotation.RequestStats;
+import com.mrnaif.javalab.dto.BatchDeleteRequest;
 import com.mrnaif.javalab.dto.PageResponse;
 import com.mrnaif.javalab.dto.product.CreateProduct;
 import com.mrnaif.javalab.dto.product.DisplayProduct;
@@ -9,6 +10,7 @@ import com.mrnaif.javalab.utils.AppConstant;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,7 +23,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/products")
+@CrossOrigin(origins = "*")
 @RequestStats
 public class ProductController {
 
@@ -42,6 +45,12 @@ public class ProductController {
     return ResponseEntity.ok(productService.createBulkProducts(products));
   }
 
+  @PostMapping("/batch/delete")
+  public ResponseEntity<Void> deleteProducts(@RequestBody BatchDeleteRequest req) {
+    productService.deleteProducts(req.getIds());
+    return ResponseEntity.ok().build();
+  }
+
   @GetMapping
   public ResponseEntity<PageResponse<DisplayProduct>> getAllProducts(
       @RequestParam(
@@ -50,7 +59,11 @@ public class ProductController {
               defaultValue = AppConstant.DEFAULT_PAGE_NUMBER)
           Integer page,
       @RequestParam(value = "size", required = false, defaultValue = AppConstant.DEFAULT_PAGE_SIZE)
-          Integer size) {
+          Integer size,
+      @RequestParam(value = "query", required = false, defaultValue = "") String query) {
+    if (!query.isEmpty()) {
+      return ResponseEntity.ok(productService.getProductsRange(Long.parseLong(query), page, size));
+    }
     return ResponseEntity.ok(productService.getAllProducts(page, size));
   }
 

@@ -9,6 +9,7 @@ import com.mrnaif.javalab.exception.ResourceNotFoundException;
 import com.mrnaif.javalab.model.Product;
 import com.mrnaif.javalab.model.Store;
 import com.mrnaif.javalab.repository.ProductRepository;
+import com.mrnaif.javalab.repository.StoreRepository;
 import com.mrnaif.javalab.service.ProductService;
 import com.mrnaif.javalab.utils.AppUtils;
 import com.mrnaif.javalab.utils.cache.CacheFactory;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -34,6 +36,7 @@ import org.springframework.stereotype.Service;
 @Transactional
 @Logging
 public class ProductServiceImpl implements ProductService {
+  private StoreRepository storeRepository;
   private ProductRepository productRepository;
 
   @PersistenceContext private EntityManager entityManager;
@@ -44,7 +47,11 @@ public class ProductServiceImpl implements ProductService {
   GenericCache<Long, Store> storeCache;
 
   public ProductServiceImpl(
-      ProductRepository productRepository, ModelMapper modelMapper, CacheFactory cacheFactory) {
+      StoreRepository storeRepository,
+      ProductRepository productRepository,
+      ModelMapper modelMapper,
+      CacheFactory cacheFactory) {
+    this.storeRepository = storeRepository;
     this.productRepository = productRepository;
     this.modelMapper = modelMapper;
     this.cache = cacheFactory.getCache(Product.class);
@@ -72,17 +79,22 @@ public class ProductServiceImpl implements ProductService {
   }
 
   public PageResponse<DisplayProduct> getAllProducts(Integer page, Integer size) {
-    AppUtils.validatePageAndSize(page, size);
-    Pageable pageable = PageRequest.of(page - 1, size);
-    Page<Product> objects = productRepository.findAll(pageable);
+    AppUtils.validatePagination(page);
+    Pageable pageable;
+    if (size == -1) {
+      pageable = Pageable.unpaged();
+    } else {
+      pageable = PageRequest.of(page - 1, size);
+    }
+    Page<Product> objects = productRepository.findAllByOrderByCreatedDesc(pageable);
     List<DisplayProduct> responses =
         Arrays.asList(modelMapper.map(objects.getContent(), DisplayProduct[].class));
 
     PageResponse<DisplayProduct> pageResponse = new PageResponse<>();
-    pageResponse.setContent(responses);
+    pageResponse.setResult(responses);
+    pageResponse.setCount(objects.getNumberOfElements());
     pageResponse.setSize(size);
     pageResponse.setPage(page);
-    pageResponse.setTotalElements(objects.getNumberOfElements());
     pageResponse.setTotalPages(objects.getTotalPages());
     pageResponse.setLast(objects.isLast());
 
@@ -127,8 +139,33 @@ public class ProductServiceImpl implements ProductService {
     }
     Product product = optionalProduct.get();
     try {
+      if (updates.containsKey("userEmail")) {
+        updates.remove("userEmail");
+      }
       if (updates.containsKey("created")) {
         product.setCreated(Instant.parse(updates.remove("created").toString()));
+      }
+      if (updates.containsKey("stores")) {
+        Set.copyOf(product.getStores())
+            .forEach(
+                store -> {
+                  store.removeProduct(id);
+                  storeCache.invalidate(store.getId());
+                });
+        @SuppressWarnings("unchecked")
+        List<Integer> storeIdsInt = (List<Integer>) updates.remove("stores");
+        List<Long> storeIds =
+            storeIdsInt.stream().map(Integer::longValue).collect(Collectors.toList());
+        storeIds.forEach(
+            stId -> {
+              Store store =
+                  storeRepository
+                      .findById(stId)
+                      .orElseThrow(
+                          () -> new ResourceNotFoundException("Store not found with id = " + stId));
+              product.addStore(store);
+              storeCache.invalidate(store.getId());
+            });
       }
       BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(product);
       beanWrapper.setPropertyValues(updates);
@@ -154,5 +191,32 @@ public class ProductServiceImpl implements ProductService {
             });
     productRepository.deleteById(id);
     cache.invalidate(id);
+  }
+
+  public PageResponse<DisplayProduct> getProductsRange(Long storeId, Integer page, Integer size) {
+    AppUtils.validatePagination(page);
+    Pageable pageable;
+    if (size == -1) {
+      pageable = Pageable.unpaged();
+    } else {
+      pageable = PageRequest.of(page - 1, size);
+    }
+    Page<Product> objects = productRepository.findProductsByStoresId(storeId, pageable);
+    List<DisplayProduct> responses =
+        Arrays.asList(modelMapper.map(objects.getContent(), DisplayProduct[].class));
+
+    PageResponse<DisplayProduct> pageResponse = new PageResponse<>();
+    pageResponse.setResult(responses);
+    pageResponse.setCount(objects.getNumberOfElements());
+    pageResponse.setSize(size);
+    pageResponse.setPage(page);
+    pageResponse.setTotalPages(objects.getTotalPages());
+    pageResponse.setLast(objects.isLast());
+
+    return pageResponse;
+  }
+
+  public void deleteProducts(List<Long> ids) {
+    ids.forEach(this::deleteProduct);
   }
 }

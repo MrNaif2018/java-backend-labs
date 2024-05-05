@@ -2,7 +2,6 @@ package com.mrnaif.javalab.service.impl;
 
 import com.mrnaif.javalab.aop.annotation.Logging;
 import com.mrnaif.javalab.dto.PageResponse;
-import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
 import com.mrnaif.javalab.exception.InvalidRequestException;
@@ -25,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.PropertyAccessorFactory;
@@ -80,17 +80,22 @@ public class StoreServiceImpl implements StoreService {
   }
 
   public PageResponse<DisplayStore> getAllStores(Integer page, Integer size) {
-    AppUtils.validatePageAndSize(page, size);
-    Pageable pageable = PageRequest.of(page - 1, size);
-    Page<Store> objects = storeRepository.findAll(pageable);
+    AppUtils.validatePagination(page);
+    Pageable pageable;
+    if (size == -1) {
+      pageable = Pageable.unpaged();
+    } else {
+      pageable = PageRequest.of(page - 1, size);
+    }
+    Page<Store> objects = storeRepository.findAllByOrderByCreatedDesc(pageable);
     List<DisplayStore> responses =
         Arrays.asList(modelMapper.map(objects.getContent(), DisplayStore[].class));
 
     PageResponse<DisplayStore> pageResponse = new PageResponse<>();
-    pageResponse.setContent(responses);
+    pageResponse.setResult(responses);
+    pageResponse.setCount(objects.getNumberOfElements());
     pageResponse.setSize(size);
     pageResponse.setPage(page);
-    pageResponse.setTotalElements(objects.getNumberOfElements());
     pageResponse.setTotalPages(objects.getTotalPages());
     pageResponse.setLast(objects.isLast());
 
@@ -133,8 +138,34 @@ public class StoreServiceImpl implements StoreService {
     }
     Store store = optionalStore.get();
     try {
+      if (updates.containsKey("userEmail")) {
+        updates.remove("userEmail");
+      }
       if (updates.containsKey("created")) {
         store.setCreated(Instant.parse(updates.remove("created").toString()));
+      }
+      if (updates.containsKey("products")) {
+        Set.copyOf(store.getProducts())
+            .forEach(
+                product -> {
+                  product.removeStore(id);
+                  productCache.invalidate(product.getId());
+                });
+        @SuppressWarnings("unchecked")
+        List<Integer> productIdsInt = (List<Integer>) updates.remove("products");
+        List<Long> productIds =
+            productIdsInt.stream().map(Integer::longValue).collect(Collectors.toList());
+        productIds.forEach(
+            prId -> {
+              Product product =
+                  productRepository
+                      .findById(prId)
+                      .orElseThrow(
+                          () ->
+                              new ResourceNotFoundException("Product not found with id = " + prId));
+              store.addProduct(product);
+              productCache.invalidate(product.getId());
+            });
       }
       BeanWrapper beanWrapper = PropertyAccessorFactory.forBeanPropertyAccess(store);
       beanWrapper.setPropertyValues(updates);
@@ -197,23 +228,30 @@ public class StoreServiceImpl implements StoreService {
     return modelMapper.map(storeRepository.save(store), DisplayStore.class);
   }
 
-  public PageResponse<DisplayProduct> getProductsRange(
-      Long storeId, Double minPrice, Double maxPrice, Integer page, Integer size) {
-    AppUtils.validatePageAndSize(page, size);
-    Pageable pageable = PageRequest.of(page - 1, size);
-    Page<Product> objects =
-        productRepository.findProductsByStoresIdAndPrice(storeId, minPrice, maxPrice, pageable);
-    List<DisplayProduct> responses =
-        Arrays.asList(modelMapper.map(objects.getContent(), DisplayProduct[].class));
+  public PageResponse<DisplayStore> getStoresRange(Long productId, Integer page, Integer size) {
+    AppUtils.validatePagination(page);
+    Pageable pageable;
+    if (size == -1) {
+      pageable = Pageable.unpaged();
+    } else {
+      pageable = PageRequest.of(page - 1, size);
+    }
+    Page<Store> objects = storeRepository.findStoresByProductId(productId, pageable);
+    List<DisplayStore> responses =
+        Arrays.asList(modelMapper.map(objects.getContent(), DisplayStore[].class));
 
-    PageResponse<DisplayProduct> pageResponse = new PageResponse<>();
-    pageResponse.setContent(responses);
+    PageResponse<DisplayStore> pageResponse = new PageResponse<>();
+    pageResponse.setResult(responses);
+    pageResponse.setCount(objects.getNumberOfElements());
     pageResponse.setSize(size);
     pageResponse.setPage(page);
-    pageResponse.setTotalElements(objects.getNumberOfElements());
     pageResponse.setTotalPages(objects.getTotalPages());
     pageResponse.setLast(objects.isLast());
 
     return pageResponse;
+  }
+
+  public void deleteStores(List<Long> ids) {
+    ids.forEach(this::deleteStore);
   }
 }

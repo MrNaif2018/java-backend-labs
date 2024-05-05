@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import com.mrnaif.javalab.dto.PageResponse;
-import com.mrnaif.javalab.dto.product.DisplayProduct;
 import com.mrnaif.javalab.dto.store.CreateStore;
 import com.mrnaif.javalab.dto.store.DisplayStore;
 import com.mrnaif.javalab.exception.InvalidRequestException;
@@ -21,6 +22,7 @@ import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,7 +73,14 @@ class StoreServiceImplTest {
     MockitoAnnotations.openMocks(this);
     passwordEncoder = new BCryptPasswordEncoder();
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    user = new User(1L, "test@test.com", passwordEncoder.encode("password"), Instant.now());
+    user =
+        new User(
+            1L,
+            "test@test.com",
+            passwordEncoder.encode("password"),
+            new ArrayList<>(),
+            new ArrayList<>(),
+            Instant.now());
     store = new Store(1L, "Test Store", "store@store.com", user, new HashSet<>(), Instant.now());
     product =
         new Product(
@@ -125,13 +134,16 @@ class StoreServiceImplTest {
   void testGetAllStores() {
     List<Store> stores = List.of(store, store, store);
     Page<Store> pagedStores = new PageImpl<Store>(stores);
-    when(storeRepository.findAll(any(Pageable.class))).thenReturn(pagedStores);
+    when(storeRepository.findAllByOrderByCreatedDesc(any(Pageable.class))).thenReturn(pagedStores);
     PageResponse<DisplayStore> response = storeService.getAllStores(1, 10);
-    List<DisplayStore> result = response.getContent();
+    PageResponse<DisplayStore> response2 = storeService.getAllStores(1, -1);
+    response2.setSize(10);
+    assertEquals(response, response2);
+    List<DisplayStore> result = response.getResult();
 
     assertEquals(1, response.getPage());
     assertEquals(10, response.getSize());
-    assertEquals(3, response.getTotalElements());
+    assertEquals(3, response.getCount());
     assertEquals(3, result.size());
     assertEquals(modelMapper.map(store, DisplayStore.class), result.get(1));
   }
@@ -260,19 +272,32 @@ class StoreServiceImplTest {
   }
 
   @Test
-  void testGetProductsRange() {
-    List<Product> products = List.of(product, product, product);
-    Page<Product> pagedProducts = new PageImpl<Product>(products);
-    when(productRepository.findProductsByStoresIdAndPrice(1L, 1.0, 10.0, PageRequest.of(0, 10)))
-        .thenReturn(pagedProducts);
+  void testGetStoresRange() {
+    List<Store> stores = List.of(store, store, store);
+    Page<Store> pagedStores = new PageImpl<Store>(stores);
+    when(storeRepository.findStoresByProductId(1L, PageRequest.of(0, 10))).thenReturn(pagedStores);
+    when(storeRepository.findStoresByProductId(1L, Pageable.unpaged())).thenReturn(pagedStores);
 
-    PageResponse<DisplayProduct> response = storeService.getProductsRange(1L, 1.0, 10.0, 1, 10);
-    List<DisplayProduct> result = response.getContent();
+    PageResponse<DisplayStore> response = storeService.getStoresRange(1L, 1, 10);
+    PageResponse<DisplayStore> response2 = storeService.getStoresRange(1L, 1, -1);
+    response2.setSize(10);
+    assertEquals(response, response2);
+    List<DisplayStore> result = response.getResult();
 
     assertEquals(1, response.getPage());
     assertEquals(10, response.getSize());
-    assertEquals(3, response.getTotalElements());
+    assertEquals(3, response.getCount());
     assertEquals(3, result.size());
-    assertEquals(modelMapper.map(product, DisplayProduct.class), result.get(1));
+    assertEquals(modelMapper.map(store, DisplayStore.class), result.get(1));
+  }
+
+  @Test
+  void testBulkDeleteStores() {
+    List<Long> ids = List.of(1L, 2L, 3L);
+    doNothing().when(storeRepository).deleteById(anyLong());
+    when(storeRepository.findById(anyLong())).thenReturn(Optional.of(store));
+    storeService.deleteStores(ids);
+    verify(storeRepository, times(3)).deleteById(anyLong());
+    verify(cache, times(3)).invalidate(anyLong());
   }
 }

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import com.mrnaif.javalab.dto.PageResponse;
@@ -19,6 +21,7 @@ import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -35,6 +38,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -62,7 +66,14 @@ class ProductServiceImplTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    user = new User(1L, "test@test.com", passwordEncoder.encode("password"), Instant.now());
+    user =
+        new User(
+            1L,
+            "test@test.com",
+            passwordEncoder.encode("password"),
+            new ArrayList<>(),
+            new ArrayList<>(),
+            Instant.now());
     product =
         new Product(
             1L, "Test Product", 10.0, 10L, "Test Product", user, new HashSet<>(), Instant.now());
@@ -115,13 +126,14 @@ class ProductServiceImplTest {
   void testGetAllProducts() {
     List<Product> products = List.of(product, product, product);
     Page<Product> pagedProducts = new PageImpl<Product>(products);
-    when(productRepository.findAll(any(Pageable.class))).thenReturn(pagedProducts);
+    when(productRepository.findAllByOrderByCreatedDesc(any(Pageable.class)))
+        .thenReturn(pagedProducts);
     PageResponse<DisplayProduct> response = productService.getAllProducts(1, 10);
-    List<DisplayProduct> result = response.getContent();
+    List<DisplayProduct> result = response.getResult();
 
     assertEquals(1, response.getPage());
     assertEquals(10, response.getSize());
-    assertEquals(3, response.getTotalElements());
+    assertEquals(3, response.getCount());
     assertEquals(3, result.size());
     assertEquals(modelMapper.map(product, DisplayProduct.class), result.get(1));
   }
@@ -220,5 +232,37 @@ class ProductServiceImplTest {
     verify(productRepository, times(1)).deleteById(1L);
     verify(storeCache, times(1)).invalidate(1L);
     verify(cache, times(1)).invalidate(1L);
+  }
+
+  @Test
+  void testGetProductsRange() {
+    List<Product> products = List.of(product, product, product);
+    Page<Product> pagedProducts = new PageImpl<Product>(products);
+    when(productRepository.findProductsByStoresId(1L, PageRequest.of(0, 10)))
+        .thenReturn(pagedProducts);
+    when(productRepository.findProductsByStoresId(1L, Pageable.unpaged()))
+        .thenReturn(pagedProducts);
+
+    PageResponse<DisplayProduct> response = productService.getProductsRange(1L, 1, 10);
+    PageResponse<DisplayProduct> response2 = productService.getProductsRange(1L, 1, -1);
+    response2.setSize(10);
+    assertEquals(response, response2);
+    List<DisplayProduct> result = response.getResult();
+
+    assertEquals(1, response.getPage());
+    assertEquals(10, response.getSize());
+    assertEquals(3, response.getCount());
+    assertEquals(3, result.size());
+    assertEquals(modelMapper.map(product, DisplayProduct.class), result.get(1));
+  }
+
+  @Test
+  void testBulkDeleteProducts() {
+    List<Long> ids = List.of(1L, 2L, 3L);
+    doNothing().when(productRepository).deleteById(anyLong());
+    when(productRepository.findById(anyLong())).thenReturn(Optional.of(product));
+    productService.deleteProducts(ids);
+    verify(productRepository, times(3)).deleteById(anyLong());
+    verify(cache, times(3)).invalidate(anyLong());
   }
 }

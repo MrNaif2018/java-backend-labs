@@ -1,11 +1,11 @@
 package com.mrnaif.javalab.dto.store;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class CreateStore extends BaseStore {
+public class CreateStore {
+  private String name;
+  private String email;
 
   private Long userId;
 }

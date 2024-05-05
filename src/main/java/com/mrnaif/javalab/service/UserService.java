@@ -21,4 +21,6 @@ public interface UserService {
   DisplayUser partialUpdateUser(Long id, Map<String, Object> updates);
 
   void deleteUser(Long id);
+
+  void deleteUsers(List<Long> ids);
 }

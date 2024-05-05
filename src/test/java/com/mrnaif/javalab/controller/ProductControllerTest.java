@@ -13,6 +13,7 @@ import com.mrnaif.javalab.model.Product;
 import com.mrnaif.javalab.model.User;
 import com.mrnaif.javalab.service.ProductService;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +47,9 @@ class ProductControllerTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    user = new User(1L, "test@test.com", "password", Instant.now());
+    user =
+        new User(
+            1L, "test@test.com", "password", new ArrayList<>(), new ArrayList<>(), Instant.now());
     product =
         new Product(
             1L, "Test Product", 10.0, 10L, "Test Product", user, new HashSet<>(), Instant.now());
@@ -59,14 +62,15 @@ class ProductControllerTest {
     List<DisplayProduct> products =
         List.of(new DisplayProduct(), new DisplayProduct(), new DisplayProduct());
     PageResponse<DisplayProduct> pageResponse =
-        new PageResponse<DisplayProduct>(products, 1, 10, 3, 1, false);
+        new PageResponse<DisplayProduct>(products, 3, 1, 10, 1, false);
 
     when(productService.getAllProducts(1, 10)).thenReturn(pageResponse);
 
-    ResponseEntity<PageResponse<DisplayProduct>> response = productController.getAllProducts(1, 10);
+    ResponseEntity<PageResponse<DisplayProduct>> response =
+        productController.getAllProducts(1, 10, "");
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
-    assertEquals(products, response.getBody().getContent());
+    assertEquals(products, response.getBody().getResult());
 
     verify(productService, times(1)).getAllProducts(1, 10);
     verifyNoMoreInteractions(productService);

@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import com.mrnaif.javalab.dto.PageResponse;
@@ -17,6 +19,7 @@ import com.mrnaif.javalab.utils.cache.CacheFactory;
 import com.mrnaif.javalab.utils.cache.GenericCache;
 import jakarta.persistence.EntityManager;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +60,14 @@ class UserServiceImplTest {
   public void setUp() {
     MockitoAnnotations.openMocks(this);
     modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-    user = new User(1L, "test@test.com", passwordEncoder.encode("password"), Instant.now());
+    user =
+        new User(
+            1L,
+            "test@test.com",
+            passwordEncoder.encode("password"),
+            new ArrayList<>(),
+            new ArrayList<>(),
+            Instant.now());
   }
 
   @Test
@@ -107,13 +117,16 @@ class UserServiceImplTest {
   void testGetAllUsers() {
     List<User> users = List.of(user, user, user);
     Page<User> pagedUsers = new PageImpl<User>(users);
-    when(userRepository.findAll(any(Pageable.class))).thenReturn(pagedUsers);
+    when(userRepository.findAllByOrderByCreatedDesc(any(Pageable.class))).thenReturn(pagedUsers);
     PageResponse<DisplayUser> response = userService.getAllUsers(1, 10);
-    List<DisplayUser> result = response.getContent();
+    PageResponse<DisplayUser> response2 = userService.getAllUsers(1, -1);
+    response2.setSize(10);
+    assertEquals(response, response2);
+    List<DisplayUser> result = response.getResult();
 
     assertEquals(1, response.getPage());
     assertEquals(10, response.getSize());
-    assertEquals(3, response.getTotalElements());
+    assertEquals(3, response.getCount());
     assertEquals(3, result.size());
     assertEquals(modelMapper.map(user, DisplayUser.class), result.get(1));
   }
@@ -186,5 +199,14 @@ class UserServiceImplTest {
     userService.deleteUser(1L);
     verify(userRepository, times(1)).deleteById(1L);
     verify(cache, times(1)).invalidate(1L);
+  }
+
+  @Test
+  void testBulkDeleteUsers() {
+    List<Long> ids = List.of(1L, 2L, 3L);
+    doNothing().when(userRepository).deleteById(anyLong());
+    userService.deleteUsers(ids);
+    verify(userRepository, times(3)).deleteById(anyLong());
+    verify(cache, times(3)).invalidate(anyLong());
   }
 }
